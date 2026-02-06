@@ -1,0 +1,12 @@
+.git
+.gitignore
+bin
+.cursor
+.claude
+.idea
+.vscode
+*.out
+*.test
+.DS_Store
+README.md
+STRUCTURE.md
