@@ -2,7 +2,6 @@ name: docker-publish
 
 on:
   push:
-    branches: [main]
     tags: ["v*"]
 
 permissions:
@@ -25,7 +24,6 @@ jobs:
         with:
           images: ghcr.io/89jobrien/hooks
           tags: |
-            type=ref,event=branch
             type=ref,event=tag
             type=sha
       - uses: docker/build-push-action@v5

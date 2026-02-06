@@ -2,6 +2,7 @@
 
 [![ci](https://github.com/89jobrien/hooks/actions/workflows/ci.yml/badge.svg)](https://github.com/89jobrien/hooks/actions/workflows/ci.yml)
 [![release-please](https://github.com/89jobrien/hooks/actions/workflows/release-please.yml/badge.svg)](https://github.com/89jobrien/hooks/actions/workflows/release-please.yml)
+[![docker-publish](https://github.com/89jobrien/hooks/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/89jobrien/hooks/actions/workflows/docker-publish.yml)
 
 Go hooks for Cursor/Claude: security, quality, and session lifecycle.
 
@@ -108,4 +109,5 @@ Run `./hooks/scripts/sync-config.sh` from repo root (or `make -C hooks config`).
 From repo root: `make -C hooks summary`. Prints approximate tool-call count (from audit logs modified in last 24h) and token total from `~/.cursor/cost/cost.log`. Override dirs with `HOOK_AUDIT_DIR` and `HOOK_COST_DIR`.
 
 ## CI
+
 CI runs `gofmt` and `go test` on push and PRs. Release automation is handled by release-please on `main`, which opens a PR to bump the version and update `CHANGELOG.md`, then creates a GitHub Release when merged.

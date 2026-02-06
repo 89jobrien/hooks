@@ -12,7 +12,7 @@ CMDS := \
 
 BINS := $(addprefix $(BINDIR)/,$(CMDS))
 
-.PHONY: all test clean config summary
+.PHONY: all test clean config summary docker-build docker-run
 
 all: $(BINS)
 
@@ -34,3 +34,9 @@ test:
 
 clean:
 	rm -rf $(BINDIR)
+
+docker-build:
+	docker build -t ghcr.io/89jobrien/hooks:local .
+
+docker-run:
+	docker run --rm ghcr.io/89jobrien/hooks:local audit
