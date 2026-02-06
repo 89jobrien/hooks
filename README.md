@@ -1,5 +1,8 @@
 # Hooks
 
+[![ci](https://github.com/89jobrien/hooks/actions/workflows/ci.yml/badge.svg)](https://github.com/89jobrien/hooks/actions/workflows/ci.yml)
+[![release-please](https://github.com/89jobrien/hooks/actions/workflows/release-please.yml/badge.svg)](https://github.com/89jobrien/hooks/actions/workflows/release-please.yml)
+
 Go hooks for Cursor/Claude: security, quality, and session lifecycle.
 
 Codebase layout and conventions: [STRUCTURE.md](STRUCTURE.md).
@@ -11,6 +14,20 @@ make all    # build 25 binaries (hooks + gen-config) to bin/
 make test   # run tests (~0.5s)
 make config # from repo root: generate .cursor/hooks.json, .claude/settings.json, and (if env in config) .cursor/hooks.env. Requires bin/ built first (make all).
 make clean  # remove bin/
+```
+
+## Container
+
+Build:
+
+```bash
+docker build -t ghcr.io/89jobrien/hooks:local .
+```
+
+Run a hook:
+
+```bash
+docker run --rm ghcr.io/89jobrien/hooks:local audit
 ```
 
 ## Hooks (by event)
@@ -91,5 +108,4 @@ Run `./hooks/scripts/sync-config.sh` from repo root (or `make -C hooks config`).
 From repo root: `make -C hooks summary`. Prints approximate tool-call count (from audit logs modified in last 24h) and token total from `~/.cursor/cost/cost.log`. Override dirs with `HOOK_AUDIT_DIR` and `HOOK_COST_DIR`.
 
 ## CI
-
-`.github/workflows/hooks.yml` runs on push/PR when `hooks/**` or the workflow file changes: `make -C hooks test`, `make all`, `make config`, integration test (run hook binaries with canned stdin), then checks that `.cursor/hooks.json` and `.claude/settings.json` exist.
+CI runs `gofmt` and `go test` on push and PRs. Release automation is handled by release-please on `main`, which opens a PR to bump the version and update `CHANGELOG.md`, then creates a GitHub Release when merged.
