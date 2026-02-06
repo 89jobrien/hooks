@@ -1,0 +1,96 @@
+# Single source of truth for Cursor/Claude hooks.
+# From repo root: make -C hooks config
+# Generates .cursor/hooks.json, .claude/settings.json, and optionally .cursor/hooks.env
+
+version: 1
+
+# Optional: per-hook env. Written to .cursor/hooks.env; source it before Cursor to apply.
+# env:
+#   HOOK_MAX_FILE_LINES: "500"
+#   HOOK_PROTECTED_BRANCHES: "main,master"
+#   HOOK_RATE_LIMIT: "30"
+
+# Optional: allowlists written to .cursor/hooks-allowlists.json. Hooks read HOOK_ALLOWLISTS_PATH (default .cursor/hooks-allowlists.json).
+# networkFence.allowedDomains: used by network-fence. importGuard and dependencyTyposquat format TBD.
+# allowlists:
+#   networkFence:
+#     allowedDomains:
+#       - localhost
+#       - github.com
+#       - api.github.com
+
+sessionStart:
+  - session-guard
+  - time-tracker-start
+  - codebase-map
+
+beforeSubmitPrompt:
+  - prompt-enricher
+  - codebase-map
+  - jit-context
+
+preToolUse:
+  - name: rate-limiter
+  - name: dry-run-mode
+    matcher: Shell
+  - name: validate-shell
+    matcher: Shell
+  - name: shellcheck
+    matcher: Shell
+  - name: no-long-running
+    matcher: Shell
+  - name: network-fence
+    matcher: Shell
+  - name: dependency-typosquat
+    matcher: Shell
+  - name: readonly-guard
+    matcher: Write
+  - name: path-validation
+    matcher: Write
+  - name: validate-write
+    matcher: Write
+  - name: file-size-guard
+    matcher: Write
+  # Disable a hook: set enabled: false (omitted from generated JSON)
+  # - name: rate-limiter
+  #   enabled: false
+  # Opt-in: uncomment and set HOOK_BRANCH_GUARD=1 etc.
+  # - name: branch-guard
+  #   matcher: Shell
+  # - name: commit-msg-lint
+  #   matcher: Shell
+  # - name: no-sudo
+  #   matcher: Shell
+
+postToolUse:
+  - name: audit
+  - name: cost-estimator
+  - name: secret-scanner
+    matcher: Write
+  - name: lint-on-write
+    matcher: Write
+  - name: lint-changed
+    matcher: Write
+  - name: typecheck-changed
+    matcher: Write
+  - name: shellcheck
+    matcher: Write
+  - name: test-buddy
+    matcher: Write
+  - name: import-guard
+    matcher: Write
+  - name: check-any-changed
+    matcher: Write
+  - name: todo-tracker
+    matcher: Write
+
+stop:
+  - session-diary
+  - self-review
+  - knowledge-update
+
+preCompact:
+  - compact-snapshot
+
+sessionEnd:
+  - time-tracker-end

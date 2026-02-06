@@ -1,0 +1,8 @@
+/bin/
+/.cursor/
+/.claude/
+/.idea/
+/.vscode/
+*.out
+*.test
+.DS_Store
