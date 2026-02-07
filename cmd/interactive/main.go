@@ -12,6 +12,8 @@ import (
 	"hooks/internal/config"
 )
 
+// main is the program entry point. It runs the scan mode when the first command-line
+// argument is "scan"; otherwise it starts the interactive mode.
 func main() {
 	if len(os.Args) > 1 && os.Args[1] == "scan" {
 		runScan()
@@ -20,6 +22,13 @@ func main() {
 	runInteractive()
 }
 
+// runScan scans the repository and global locations for hook configuration and
+// prints a concise summary to standard output.
+//
+// It reports the discovered config path and working directory (if any), the
+// count of named hooks defined in the loaded configuration, the path to a
+// generated cursor file if present, and the presence or absence of the global
+// hooks file.
 func runScan() {
 	fmt.Println("=== Project hooks ===")
 	configPath, workDir, err := config.FindConfigPath()
@@ -57,6 +66,12 @@ func runScan() {
 	}
 }
 
+// runInteractive starts a terminal-based interactive menu for managing project hooks.
+// 
+// It loads the project's configuration, presents a numbered list of defined hooks with
+// their enabled status and matchers, and allows the user to toggle hooks, save changes,
+// and run the repository's gen-config command. The function exits on user quit or on
+// fatal configuration load errors.
 func runInteractive() {
 	configPath, workDir, err := config.FindConfigPath()
 	if err != nil {

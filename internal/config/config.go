@@ -82,7 +82,8 @@ func (c *Config) Events() []EventEntries {
 }
 
 // FindConfigPath returns path to config.yaml (hooks/config.yaml or config.yaml) and work dir (repo root or hooks dir).
-// Search starts at cwd and walks up until a config file is found.
+// FindConfigPath searches upward from the current working directory for a configuration file and returns the file path and the directory that contains it.
+// It looks for "hooks/config.yaml" first and then "config.yaml" in each directory. If no config is found, it returns an error describing the directory where the search started.
 func FindConfigPath() (configPath, workDir string, err error) {
 	dir, err := os.Getwd()
 	if err != nil {
@@ -106,13 +107,14 @@ func FindConfigPath() (configPath, workDir string, err error) {
 	}
 }
 
-// GlobalHooksPath returns the global hooks.json path (~/.cursor/hooks.json).
+// GlobalHooksPath returns the path to the global hooks configuration file (~/.cursor/hooks.json).
 func GlobalHooksPath() string {
 	home, _ := os.UserHomeDir()
 	return filepath.Join(home, ".cursor", "hooks.json")
 }
 
-// Load reads config from path.
+// Load reads a YAML configuration file from the given path and unmarshals it into a Config.
+// It returns the parsed Config or an error if the file cannot be read or the YAML cannot be parsed.
 func Load(path string) (*Config, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
@@ -125,7 +127,8 @@ func Load(path string) (*Config, error) {
 	return &cfg, nil
 }
 
-// Save writes config to path.
+// Save marshals cfg to YAML and writes it to the given path.
+// It returns an error if marshaling or writing the file fails.
 func Save(path string, cfg *Config) error {
 	data, err := yaml.Marshal(cfg)
 	if err != nil {
