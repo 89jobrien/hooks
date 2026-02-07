@@ -8,7 +8,7 @@ CMDS := \
 	time-tracker-start time-tracker-end \
 	rate-limiter cost-estimator dry-run-mode \
 	self-review knowledge-update \
-	gen-config
+	gen-config interactive
 
 BINS := $(addprefix $(BINDIR)/,$(CMDS))
 
@@ -25,7 +25,7 @@ config: $(BINDIR)/gen-config
 summary:
 	@bash "$(CURDIR)/scripts/summary.sh"
 
-$(BINDIR)/%: cmd/%/main.go $(wildcard internal/hooks/*.go)
+$(BINDIR)/%: cmd/%/main.go $(wildcard internal/hooks/*.go) $(wildcard internal/config/*.go)
 	@mkdir -p $(BINDIR)
 	go build -o $@ ./cmd/$*
 
