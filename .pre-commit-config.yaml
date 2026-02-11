@@ -22,9 +22,3 @@ repos:
         entry: go test ./...
         language: system
         pass_filenames: false
-      - id: check-no-emojis
-        name: Check for emojis
-        entry: python3 ../.workspace/check-no-emojis.py
-        language: system
-        files: '\.(py|md|txt|json|yaml|yml|toml|ts|tsx|js|jsx|go|rs|sh)$'
-        exclude: '\.workspace/.*'

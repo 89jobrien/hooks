@@ -13,9 +13,16 @@ func main() {
 		fmt.Println(`{}`)
 		os.Exit(0)
 	}
-	data, _ := io.ReadAll(os.Stdin)
+	data, err := io.ReadAll(os.Stdin)
+	if err != nil {
+		fmt.Println(`{}`)
+		os.Exit(0)
+	}
 	var input hooks.HookInput
-	json.Unmarshal(data, &input)
+	if err := json.Unmarshal(data, &input); err != nil {
+		fmt.Println(`{}`)
+		os.Exit(0)
+	}
 
 	result, code := hooks.SelfReview(input)
 	out, _ := json.Marshal(result)
