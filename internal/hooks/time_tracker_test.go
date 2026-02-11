@@ -13,8 +13,8 @@ func TestTimeTracker_LogsStart(t *testing.T) {
 	if code != 0 {
 		t.Errorf("expected exit 0, got %d", code)
 	}
-	if result.Decision != "allow" {
-		t.Errorf("expected allow, got %q", result.Decision)
+	if result.Decision != "" {
+		t.Errorf("expected empty decision for session hook, got %q", result.Decision)
 	}
 
 	data, err := os.ReadFile(filepath.Join(dir, "sessions.log"))
@@ -37,9 +37,9 @@ func TestTimeTracker_LogsEnd(t *testing.T) {
 	}
 }
 
-func TestTimeTracker_AlwaysAllows(t *testing.T) {
-	result, code := TimeTracker(HookInput{}, "start", t.TempDir())
-	if code != 0 || result.Decision != "allow" {
-		t.Errorf("should always allow")
+func TestTimeTracker_AlwaysExitsZero(t *testing.T) {
+	_, code := TimeTracker(HookInput{}, "start", t.TempDir())
+	if code != 0 {
+		t.Errorf("should always exit 0, got %d", code)
 	}
 }

@@ -64,7 +64,7 @@ func (h *HookInput) Pattern() string {
 
 // HookResult is the JSON output from a hook.
 type HookResult struct {
-	Decision    string `json:"decision"`
+	Decision    string `json:"decision,omitempty"`
 	Reason      string `json:"reason,omitempty"`
 	Message     string `json:"message,omitempty"`
 	LintCommand string `json:"lint_command,omitempty"`
@@ -76,6 +76,17 @@ func Allow() HookResult {
 
 func AllowMsg(msg string) HookResult {
 	return HookResult{Decision: "allow", Message: msg}
+}
+
+// NoOp returns an empty result for hooks that don't support the decision field
+// (SessionStart, SessionEnd, Stop, PreCompact).
+func NoOp() HookResult {
+	return HookResult{}
+}
+
+// NoOpMsg returns a result with only a reason for session/lifecycle hooks.
+func NoOpMsg(msg string) HookResult {
+	return HookResult{Reason: msg}
 }
 
 func Deny(reason string) HookResult {

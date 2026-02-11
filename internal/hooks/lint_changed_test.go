@@ -9,7 +9,7 @@ import (
 
 func TestLintChanged_NonWriteTool(t *testing.T) {
 	input := HookInput{
-		ToolName: "Shell",
+		ToolName:  "Shell",
 		ToolInput: []byte(`{"command": "ls"}`),
 	}
 	result, code := LintChanged(input, ".")

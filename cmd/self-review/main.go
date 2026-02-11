@@ -1,7 +1,24 @@
 package main
 
-import "hooks/internal/hooks"
+import (
+	"encoding/json"
+	"fmt"
+	"hooks/internal/hooks"
+	"io"
+	"os"
+)
 
 func main() {
-	hooks.RunOrDisabled("self-review", hooks.SelfReview)
+	if hooks.IsHookDisabled("self-review") {
+		fmt.Println(`{}`)
+		os.Exit(0)
+	}
+	data, _ := io.ReadAll(os.Stdin)
+	var input hooks.HookInput
+	json.Unmarshal(data, &input)
+
+	result, code := hooks.SelfReview(input)
+	out, _ := json.Marshal(result)
+	fmt.Println(string(out))
+	os.Exit(code)
 }

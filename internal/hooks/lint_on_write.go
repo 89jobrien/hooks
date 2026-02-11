@@ -6,16 +6,16 @@ import (
 )
 
 var lintCommands = map[string]string{
-	".go":  "gofmt -w %s",
-	".py":  "ruff check --fix %s",
-	".js":  "eslint --fix %s",
-	".jsx": "eslint --fix %s",
-	".ts":  "eslint --fix %s",
-	".tsx": "eslint --fix %s",
-	".rs":  "rustfmt %s",
-	".sh":  "shfmt -w %s",
+	".go":   "gofmt -w %s",
+	".py":   "ruff check --fix %s",
+	".js":   "eslint --fix %s",
+	".jsx":  "eslint --fix %s",
+	".ts":   "eslint --fix %s",
+	".tsx":  "eslint --fix %s",
+	".rs":   "rustfmt %s",
+	".sh":   "shfmt -w %s",
 	".bash": "shfmt -w %s",
-	".tf":  "terraform fmt %s",
+	".tf":   "terraform fmt %s",
 }
 
 // LintOnWrite is a postToolUse hook that suggests a lint command after file writes.

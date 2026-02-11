@@ -18,21 +18,21 @@ var selfReviewMarkers = []string{
 // It reads the transcript and warns if no markers are found, but always allows (doesn't block).
 func SelfReview(input HookInput) (HookResult, int) {
 	if input.StopHookActive() {
-		return Allow(), 0
+		return NoOp(), 0
 	}
 
 	transcriptPath := input.TranscriptPath()
 	if transcriptPath == "" {
-		return Allow(), 0
+		return NoOp(), 0
 	}
 
 	if _, err := os.Stat(transcriptPath); err != nil {
-		return Allow(), 0
+		return NoOp(), 0
 	}
 
 	content, err := os.ReadFile(transcriptPath)
 	if err != nil {
-		return Allow(), 0
+		return NoOp(), 0
 	}
 
 	contentLower := strings.ToLower(string(content))
@@ -45,7 +45,7 @@ func SelfReview(input HookInput) (HookResult, int) {
 	}
 
 	if hasMarker {
-		return Allow(), 0
+		return NoOp(), 0
 	}
 
 	// No marker found - generate warning with review questions
@@ -60,7 +60,7 @@ func SelfReview(input HookInput) (HookResult, int) {
 		msg.WriteString("\n")
 	}
 
-	return AllowMsg(msg.String()), 0
+	return NoOpMsg(msg.String()), 0
 }
 
 func generateReviewQuestions(filePath string) []string {

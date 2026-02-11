@@ -29,11 +29,11 @@ type knowledgeEntities struct {
 }
 
 type knowledgeUpdate struct {
-	Timestamp   string           `json:"timestamp"`
-	SessionID   string           `json:"session_id"`
-	Cwd         string           `json:"cwd"`
-	Entities    knowledgeEntities `json:"entities"`
-	Summary     map[string]int   `json:"summary"`
+	Timestamp string            `json:"timestamp"`
+	SessionID string            `json:"session_id"`
+	Cwd       string            `json:"cwd"`
+	Entities  knowledgeEntities `json:"entities"`
+	Summary   map[string]int    `json:"summary"`
 }
 
 // KnowledgeUpdate is a stop hook that extracts knowledge entities from session transcript
@@ -172,7 +172,7 @@ Transcript:
 				"content": prompt,
 			},
 		},
-		"max_tokens": maxTokens,
+		"max_tokens":  maxTokens,
 		"temperature": 0.3,
 		"response_format": map[string]string{
 			"type": "json_object",
@@ -286,7 +286,7 @@ func saveKnowledgeUpdate(entities knowledgeEntities, cwd, sessionID string) (str
 		Entities:  entities,
 		Summary: map[string]int{
 			"files_created":      len(entities.FilesCreated),
-			"dependencies_added":  len(entities.DependenciesAdded),
+			"dependencies_added": len(entities.DependenciesAdded),
 			"patterns_observed":  len(entities.PatternsUsed),
 			"technologies_used":  len(entities.Technologies),
 			"components_added":   len(entities.ComponentsAdded),

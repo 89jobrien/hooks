@@ -49,16 +49,16 @@ type Allowlists struct {
 }
 
 type Config struct {
-	Version            int                 `yaml:"version"`
-	Env                map[string]string   `yaml:"env,omitempty"`
-	Allowlists         *Allowlists         `yaml:"allowlists,omitempty"`
-	SessionStart       []HookEntry         `yaml:"sessionStart"`
-	BeforeSubmitPrompt []HookEntry    `yaml:"beforeSubmitPrompt"`
-	PreToolUse         []HookEntry    `yaml:"preToolUse"`
-	PostToolUse        []HookEntry    `yaml:"postToolUse"`
-	Stop               []HookEntry    `yaml:"stop"`
-	PreCompact         []HookEntry    `yaml:"preCompact"`
-	SessionEnd         []HookEntry    `yaml:"sessionEnd"`
+	Version            int               `yaml:"version"`
+	Env                map[string]string `yaml:"env,omitempty"`
+	Allowlists         *Allowlists       `yaml:"allowlists,omitempty"`
+	SessionStart       []HookEntry       `yaml:"sessionStart"`
+	BeforeSubmitPrompt []HookEntry       `yaml:"beforeSubmitPrompt"`
+	PreToolUse         []HookEntry       `yaml:"preToolUse"`
+	PostToolUse        []HookEntry       `yaml:"postToolUse"`
+	Stop               []HookEntry       `yaml:"stop"`
+	PreCompact         []HookEntry       `yaml:"preCompact"`
+	SessionEnd         []HookEntry       `yaml:"sessionEnd"`
 }
 
 const binPrefix = "./hooks/bin/"
@@ -269,13 +269,13 @@ func claudeConfig(cfg Config) map[string]interface{} {
 	}
 	return map[string]interface{}{
 		"hooks": map[string]interface{}{
-			"SessionStart":       []map[string]interface{}{{"matcher": ".*", "hooks": hookClause(filterEntries(cfg.SessionStart))}},
-			"UserPromptSubmit":   []map[string]interface{}{{"matcher": ".*", "hooks": hookClause(filterEntries(cfg.BeforeSubmitPrompt))}},
-			"PreToolUse":         claudePreToolUse(filterEntries(cfg.PreToolUse)),
-			"PostToolUse":        claudePostToolUse(filterEntries(cfg.PostToolUse)),
-			"Stop":               []map[string]interface{}{{"matcher": ".*", "hooks": hookClause(filterEntries(cfg.Stop))}},
-			"PreCompact":         []map[string]interface{}{{"matcher": ".*", "hooks": hookClause(filterEntries(cfg.PreCompact))}},
-			"SessionEnd":         []map[string]interface{}{{"matcher": ".*", "hooks": hookClause(filterEntries(cfg.SessionEnd))}},
+			"SessionStart":     []map[string]interface{}{{"matcher": ".*", "hooks": hookClause(filterEntries(cfg.SessionStart))}},
+			"UserPromptSubmit": []map[string]interface{}{{"matcher": ".*", "hooks": hookClause(filterEntries(cfg.BeforeSubmitPrompt))}},
+			"PreToolUse":       claudePreToolUse(filterEntries(cfg.PreToolUse)),
+			"PostToolUse":      claudePostToolUse(filterEntries(cfg.PostToolUse)),
+			"Stop":             []map[string]interface{}{{"matcher": ".*", "hooks": hookClause(filterEntries(cfg.Stop))}},
+			"PreCompact":       []map[string]interface{}{{"matcher": ".*", "hooks": hookClause(filterEntries(cfg.PreCompact))}},
+			"SessionEnd":       []map[string]interface{}{{"matcher": ".*", "hooks": hookClause(filterEntries(cfg.SessionEnd))}},
 		},
 	}
 }

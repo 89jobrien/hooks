@@ -7,7 +7,7 @@ import (
 
 func TestCheckAnyChanged_NonWriteTool(t *testing.T) {
 	input := HookInput{
-		ToolName: "Shell",
+		ToolName:  "Shell",
 		ToolInput: []byte(`{"command": "ls"}`),
 	}
 	result, code := CheckAnyChanged(input)
@@ -152,4 +152,3 @@ func TestCheckAnyChanged_TSXFile(t *testing.T) {
 		t.Errorf("expected deny for .tsx file with any, got decision=%s code=%d", result.Decision, code)
 	}
 }
-

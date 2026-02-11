@@ -10,13 +10,13 @@ import (
 // TimeTracker is a sessionStart/sessionEnd hook that logs session timestamps.
 func TimeTracker(input HookInput, event string, logDir string) (HookResult, int) {
 	if err := os.MkdirAll(logDir, 0755); err != nil {
-		return Allow(), 0
+		return NoOp(), 0
 	}
 
 	logFile := filepath.Join(logDir, "sessions.log")
 	f, err := os.OpenFile(logFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
-		return Allow(), 0
+		return NoOp(), 0
 	}
 	defer f.Close()
 
@@ -27,5 +27,5 @@ func TimeTracker(input HookInput, event string, logDir string) (HookResult, int)
 	}
 
 	fmt.Fprintf(f, "[%s] %s\n", timestamp, label)
-	return Allow(), 0
+	return NoOp(), 0
 }

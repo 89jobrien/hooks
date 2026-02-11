@@ -14,7 +14,7 @@ var auditLineRe = regexp.MustCompile(`\[([^\]]+)\]\s+tool=(\S+)\s*(.*)`)
 // SessionDiary is a stop hook that summarizes the session from the audit log.
 func SessionDiary(input HookInput, auditDir, diaryDir string) (HookResult, int) {
 	if err := os.MkdirAll(diaryDir, 0755); err != nil {
-		return Allow(), 0
+		return NoOp(), 0
 	}
 
 	today := time.Now().Format("2006-01-02")
@@ -22,12 +22,12 @@ func SessionDiary(input HookInput, auditDir, diaryDir string) (HookResult, int) 
 
 	data, err := os.ReadFile(auditFile)
 	if err != nil {
-		return AllowMsg("No audit log found for today"), 0
+		return NoOpMsg("No audit log found for today"), 0
 	}
 
 	lines := strings.Split(strings.TrimSpace(string(data)), "\n")
 	if len(lines) == 0 {
-		return AllowMsg("Empty audit log"), 0
+		return NoOpMsg("Empty audit log"), 0
 	}
 
 	// Aggregate stats
@@ -91,5 +91,5 @@ func SessionDiary(input HookInput, auditDir, diaryDir string) (HookResult, int) 
 	diaryFile := filepath.Join(diaryDir, fmt.Sprintf("session-%s.md", time.Now().Format("2006-01-02-150405")))
 	os.WriteFile(diaryFile, []byte(sb.String()), 0644)
 
-	return AllowMsg(fmt.Sprintf("Session diary written: %d tool calls, %d files", len(lines), len(filesWritten))), 0
+	return NoOpMsg(fmt.Sprintf("Session diary written: %d tool calls, %d files", len(lines), len(filesWritten))), 0
 }

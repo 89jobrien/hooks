@@ -10,12 +10,15 @@ import (
 
 func TestCodebaseMap_NonSessionEvent(t *testing.T) {
 	input := HookInput{
-		ToolName: "Write",
+		ToolName:  "Write",
 		ToolInput: []byte(`{"path": "test.ts", "contents": "const x: any = 5;"}`),
 	}
 	result, code := CodebaseMap(input, ".", 3, nil)
-	if code != 0 || result.Decision != "allow" {
-		t.Errorf("expected allow for non-session event, got decision=%s code=%d", result.Decision, code)
+	if code != 0 {
+		t.Errorf("expected exit 0, got %d", code)
+	}
+	if result.Decision != "" {
+		t.Errorf("expected empty decision for session hook, got decision=%s code=%d", result.Decision, code)
 	}
 }
 
@@ -30,8 +33,11 @@ func TestCodebaseMap_StopHookActive(t *testing.T) {
 		ToolInput: ti,
 	}
 	result, code := CodebaseMap(input, ".", 3, nil)
-	if code != 0 || result.Decision != "allow" {
-		t.Errorf("expected allow when stop_hook_active is true, got decision=%s code=%d", result.Decision, code)
+	if code != 0 {
+		t.Errorf("expected exit 0, got %d", code)
+	}
+	if result.Decision != "" {
+		t.Errorf("expected empty decision for session hook, got decision=%s code=%d", result.Decision, code)
 	}
 }
 
@@ -51,23 +57,23 @@ func TestCodebaseMap_SessionCaching(t *testing.T) {
 
 	// First call should generate tree
 	result1, code1 := CodebaseMap(input, dir, 3, []string{"README.md", "src/**"})
-	if code1 != 0 || result1.Decision != "allow" {
-		t.Fatalf("expected allow on first call, got decision=%s code=%d", result1.Decision, code1)
+	if code1 != 0 {
+		t.Fatalf("expected exit 0, got %d", code1)
 	}
-	if result1.Message == "" {
-		t.Error("expected message with tree structure on first call")
+	if result1.Reason == "" {
+		t.Error("expected reason with tree structure on first call")
 	}
-	if !strings.Contains(result1.Message, "CODEBASE STRUCTURE") {
-		t.Error("expected message to contain 'CODEBASE STRUCTURE'")
+	if !strings.Contains(result1.Reason, "CODEBASE STRUCTURE") {
+		t.Error("expected reason to contain 'CODEBASE STRUCTURE'")
 	}
 
-	// Second call with same session_id should be cached (no message)
+	// Second call with same session_id should be cached (no reason)
 	result2, code2 := CodebaseMap(input, dir, 3, []string{"README.md", "src/**"})
-	if code2 != 0 || result2.Decision != "allow" {
-		t.Fatalf("expected allow on second call, got decision=%s code=%d", result2.Decision, code2)
+	if code2 != 0 {
+		t.Fatalf("expected exit 0, got %d", code2)
 	}
-	if result2.Message != "" {
-		t.Errorf("expected empty message on cached call, got %q", result2.Message)
+	if result2.Reason != "" {
+		t.Errorf("expected empty reason on cached call, got %q", result2.Reason)
 	}
 
 	// Different session_id should generate tree again
@@ -80,11 +86,11 @@ func TestCodebaseMap_SessionCaching(t *testing.T) {
 		ToolInput: ti2,
 	}
 	result3, code3 := CodebaseMap(input2, dir, 3, []string{"README.md", "src/**"})
-	if code3 != 0 || result3.Decision != "allow" {
-		t.Fatalf("expected allow on third call with different session, got decision=%s code=%d", result3.Decision, code3)
+	if code3 != 0 {
+		t.Fatalf("expected exit 0, got %d", code3)
 	}
-	if result3.Message == "" {
-		t.Error("expected message with tree structure for different session")
+	if result3.Reason == "" {
+		t.Error("expected reason with tree structure for different session")
 	}
 }
 
@@ -114,17 +120,17 @@ func TestCodebaseMap_GeneratesTree(t *testing.T) {
 	}
 
 	result, code := CodebaseMap(input, dir, 3, includePatterns)
-	if code != 0 || result.Decision != "allow" {
-		t.Fatalf("expected allow, got decision=%s code=%d", result.Decision, code)
+	if code != 0 {
+		t.Fatalf("expected exit 0, got %d", code)
 	}
 
-	if !strings.Contains(result.Message, "CODEBASE STRUCTURE") {
-		t.Error("expected message to contain 'CODEBASE STRUCTURE'")
+	if !strings.Contains(result.Reason, "CODEBASE STRUCTURE") {
+		t.Error("expected reason to contain 'CODEBASE STRUCTURE'")
 	}
-	if !strings.Contains(result.Message, "README.md") {
+	if !strings.Contains(result.Reason, "README.md") {
 		t.Error("expected tree to include README.md")
 	}
-	if !strings.Contains(result.Message, "src") {
+	if !strings.Contains(result.Reason, "src") {
 		t.Error("expected tree to include src directory")
 	}
 }
@@ -144,12 +150,12 @@ func TestCodebaseMap_RespectsMaxDepth(t *testing.T) {
 	}
 
 	result, code := CodebaseMap(input, dir, 2, []string{"a/**"})
-	if code != 0 || result.Decision != "allow" {
-		t.Fatalf("expected allow, got decision=%s code=%d", result.Decision, code)
+	if code != 0 {
+		t.Fatalf("expected exit 0, got %d", code)
 	}
 
 	// Should not include "d" directory (depth 3) when maxDepth is 2
-	if strings.Contains(result.Message, "d") {
+	if strings.Contains(result.Reason, "d") {
 		t.Error("expected tree to respect maxDepth and not include 'd' directory")
 	}
 }
@@ -169,11 +175,11 @@ func TestCodebaseMap_EmptyIncludePatterns(t *testing.T) {
 
 	// Should use default patterns
 	result, code := CodebaseMap(input, dir, 3, nil)
-	if code != 0 || result.Decision != "allow" {
-		t.Fatalf("expected allow, got decision=%s code=%d", result.Decision, code)
+	if code != 0 {
+		t.Fatalf("expected exit 0, got %d", code)
 	}
 	// Default patterns include *.md, so README.md should be included
-	if !strings.Contains(result.Message, "README.md") {
+	if !strings.Contains(result.Reason, "README.md") {
 		t.Error("expected default patterns to include README.md")
 	}
 }
@@ -189,11 +195,14 @@ func TestCodebaseMap_NonexistentDirectory(t *testing.T) {
 	}
 
 	result, code := CodebaseMap(input, "/nonexistent/path/12345", 3, nil)
-	if code != 0 || result.Decision != "allow" {
-		t.Errorf("expected allow for nonexistent directory, got decision=%s code=%d", result.Decision, code)
+	if code != 0 {
+		t.Errorf("expected exit 0, got %d", code)
 	}
-	if result.Message != "" {
-		t.Errorf("expected empty message for nonexistent directory, got %q", result.Message)
+	if result.Decision != "" {
+		t.Errorf("expected empty decision for session hook, got decision=%s", result.Decision)
+	}
+	if result.Reason != "" {
+		t.Errorf("expected empty reason for nonexistent directory, got %q", result.Reason)
 	}
 }
 
