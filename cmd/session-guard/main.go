@@ -10,7 +10,7 @@ import (
 
 func main() {
 	if hooks.IsHookDisabled("session-guard") {
-		fmt.Println(`{"decision": "allow"}`)
+		fmt.Println(`{}`)
 		os.Exit(0)
 	}
 	data, _ := io.ReadAll(os.Stdin)
@@ -20,7 +20,7 @@ func main() {
 
 	cwd, err := os.Getwd()
 	if err != nil {
-		fmt.Println(`{"decision": "allow", "message": "could not determine working directory"}`)
+		fmt.Println(`{}`)
 		os.Exit(0)
 	}
 

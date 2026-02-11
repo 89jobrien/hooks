@@ -10,11 +10,11 @@ import (
 )
 
 const (
-	maxFileSize      = 100_000 // 100KB
-	maxFilesToReturn = 5
-	maxGrepHits      = 10
-	maxHeadLines     = 30
-	maxTailLines     = 20
+	maxFileSize        = 100_000 // 100KB
+	maxFilesToReturn   = 5
+	maxGrepHits        = 10
+	maxHeadLines       = 30
+	maxTailLines       = 20
 	maxKeywordSearches = 2
 )
 

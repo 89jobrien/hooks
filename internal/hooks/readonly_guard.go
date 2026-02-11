@@ -38,7 +38,7 @@ var readonlyPatterns = []*regexp.Regexp{
 
 var overrideAllowed = []*regexp.Regexp{
 	regexp.MustCompile(`\.vscode/launch\.json$`), // Debug configs are ok
-	regexp.MustCompile(`\.vscode/tasks\.json$`), // Task configs are ok
+	regexp.MustCompile(`\.vscode/tasks\.json$`),  // Task configs are ok
 }
 
 // ReadonlyGuard is a preToolUse hook that protects lock files, generated files,

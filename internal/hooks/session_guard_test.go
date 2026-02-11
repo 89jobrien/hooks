@@ -35,11 +35,11 @@ func TestSessionGuard_CleanRepo(t *testing.T) {
 	if code != 0 {
 		t.Errorf("expected exit 0, got %d", code)
 	}
-	if result.Decision != "allow" {
-		t.Errorf("expected allow, got %q", result.Decision)
+	if result.Decision != "" {
+		t.Errorf("expected empty decision for session hook, got %q", result.Decision)
 	}
-	if strings.Contains(strings.ToLower(result.Message), "warning") {
-		t.Errorf("expected no warning in clean repo, got %q", result.Message)
+	if strings.Contains(strings.ToLower(result.Reason), "warning") {
+		t.Errorf("expected no warning in clean repo, got %q", result.Reason)
 	}
 }
 
@@ -51,9 +51,9 @@ func TestSessionGuard_UntrackedFiles(t *testing.T) {
 	if code != 0 {
 		t.Errorf("expected exit 0, got %d", code)
 	}
-	msg := strings.ToLower(result.Message)
+	msg := strings.ToLower(result.Reason)
 	if !strings.Contains(msg, "untracked") && !strings.Contains(msg, "warning") {
-		t.Errorf("expected untracked warning, got %q", result.Message)
+		t.Errorf("expected untracked warning, got %q", result.Reason)
 	}
 }
 
@@ -68,9 +68,9 @@ func TestSessionGuard_StagedChanges(t *testing.T) {
 	if code != 0 {
 		t.Errorf("expected exit 0, got %d", code)
 	}
-	msg := strings.ToLower(result.Message)
+	msg := strings.ToLower(result.Reason)
 	if !strings.Contains(msg, "uncommitted") && !strings.Contains(msg, "staged") && !strings.Contains(msg, "warning") {
-		t.Errorf("expected staged warning, got %q", result.Message)
+		t.Errorf("expected staged warning, got %q", result.Reason)
 	}
 }
 
@@ -97,9 +97,9 @@ func TestSessionGuard_ModifiedFiles(t *testing.T) {
 	if code != 0 {
 		t.Errorf("expected exit 0, got %d", code)
 	}
-	msg := strings.ToLower(result.Message)
+	msg := strings.ToLower(result.Reason)
 	if !strings.Contains(msg, "modified") && !strings.Contains(msg, "warning") {
-		t.Errorf("expected modified warning, got %q", result.Message)
+		t.Errorf("expected modified warning, got %q", result.Reason)
 	}
 }
 
@@ -109,8 +109,8 @@ func TestSessionGuard_NotGitRepo(t *testing.T) {
 	if code != 0 {
 		t.Errorf("expected exit 0, got %d", code)
 	}
-	if result.Decision != "allow" {
-		t.Errorf("expected allow, got %q", result.Decision)
+	if result.Decision != "" {
+		t.Errorf("expected empty decision for session hook, got %q", result.Decision)
 	}
 }
 

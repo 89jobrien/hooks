@@ -11,11 +11,13 @@ Codebase layout and conventions: [STRUCTURE.md](STRUCTURE.md).
 ## Commands
 
 ```bash
-make all    # build 25 binaries (hooks + gen-config) to bin/
-make test   # run tests (~0.5s)
+make all # build 26 binaries (hooks + gen-config + interactive) to bin/
+make test # run tests (~0.5s)
 make config # from repo root: generate .cursor/hooks.json, .claude/settings.json, and (if env in config) .cursor/hooks.env. Requires bin/ built first (make all).
-make clean  # remove bin/
+make clean # remove bin/
 ```
+
+From repo root: `./hooks/bin/interactive` (or from inside hooks: `bin/interactive`) for an interactive menu to enable/disable hooks, then save to regenerate config. `./hooks/bin/interactive scan` scans for project hooks (from cwd upward) and reports global hooks at `~/.cursor/hooks.json`.
 
 ## Container
 
@@ -82,10 +84,11 @@ docker run --rm ghcr.io/89jobrien/hooks:local audit
 
 - **Source of truth**: `hooks/config.yaml` (YAML). Edit this; do not edit the JSON by hand.
 - **Disable a hook**: set `enabled: false` on that entry (object form). Omitted from generated JSON and not validated as a binary.
+- **Interactive mode**: run `./hooks/bin/interactive` from repo root (or `bin/interactive` from inside hooks). Use the menu to toggle hooks on/off (`t <n>`), then `s` to save and run gen-config, which regenerates `.cursor/hooks.json` and `.claude/settings.json`. Use `q` to quit without saving.
 - **Generate**: from repo root run `make -C hooks config` (after `make -C hooks all`). Writes:
-  - `.cursor/hooks.json` (Cursor)
-  - `.claude/settings.json` (Claude; enable Third-party skills in Cursor)
-  - `.cursor/hooks.env` (only if `env:` is set in config.yaml; source before Cursor to set per-hook env)
+ - `.cursor/hooks.json` (Cursor)
+ - `.claude/settings.json` (Claude; enable Third-party skills in Cursor)
+ - `.cursor/hooks.env` (only if `env:` is set in config.yaml; source before Cursor to set per-hook env)
 - **Validation**: gen-config checks that every hook name in config has a binary under `hooks/bin/`. Run `make all` before `make config`.
 
 ## Externalized allowlists (YAML)

@@ -5,9 +5,9 @@ import (
 )
 
 var (
-	commitMsgRe      = regexp.MustCompile(`\bgit\s+commit\s+.*-m\s+"([^"]*)"`)
+	commitMsgRe       = regexp.MustCompile(`\bgit\s+commit\s+.*-m\s+"([^"]*)"`)
 	commitMsgSingleRe = regexp.MustCompile(`\bgit\s+commit\s+.*-m\s+'([^']*)'`)
-	conventionalRe   = regexp.MustCompile(`^(feat|fix|chore|docs|refactor|test|ci|perf|style|build|revert)(\(.+\))?!?:\s+.+`)
+	conventionalRe    = regexp.MustCompile(`^(feat|fix|chore|docs|refactor|test|ci|perf|style|build|revert)(\(.+\))?!?:\s+.+`)
 )
 
 // CommitMsgLint is a preToolUse hook that validates conventional commit messages.

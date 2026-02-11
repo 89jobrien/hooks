@@ -10,7 +10,7 @@ import (
 
 func TestShellCheck_NonShellTool(t *testing.T) {
 	input := HookInput{
-		ToolName: "Write",
+		ToolName:  "Write",
 		ToolInput: []byte(`{"path": "test.go", "contents": "package main"}`),
 	}
 	result, code := ShellCheck(input, ".")
@@ -21,7 +21,7 @@ func TestShellCheck_NonShellTool(t *testing.T) {
 
 func TestShellCheck_ShellCommand(t *testing.T) {
 	input := HookInput{
-		ToolName: "Shell",
+		ToolName:  "Shell",
 		ToolInput: []byte(`{"command": "ls -la"}`),
 	}
 	result, code := ShellCheck(input, ".")

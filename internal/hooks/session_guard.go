@@ -12,7 +12,7 @@ import (
 func SessionGuard(input HookInput, workDir string) (HookResult, int) {
 	// Check if inside git repo
 	if !isGitRepo(workDir) {
-		return HookResult{Decision: "allow", Message: "Not a git repository"}, 0
+		return NoOpMsg("Not a git repository"), 0
 	}
 
 	var warnings []string
@@ -34,10 +34,10 @@ func SessionGuard(input HookInput, workDir string) (HookResult, int) {
 	}
 
 	if len(warnings) == 0 {
-		return HookResult{Decision: "allow", Message: "workspace clean"}, 0
+		return NoOpMsg("workspace clean"), 0
 	}
 
-	return HookResult{Decision: "allow", Message: strings.Join(warnings, "; ")}, 0
+	return NoOpMsg(strings.Join(warnings, "; ")), 0
 }
 
 func isGitRepo(dir string) bool {

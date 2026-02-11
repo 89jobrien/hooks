@@ -11,7 +11,7 @@ import (
 
 func main() {
 	if hooks.IsHookDisabled("compact-snapshot") {
-		fmt.Println(`{"decision": "allow"}`)
+		fmt.Println(`{}`)
 		os.Exit(0)
 	}
 	data, _ := io.ReadAll(os.Stdin)

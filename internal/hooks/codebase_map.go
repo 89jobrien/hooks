@@ -21,7 +21,7 @@ func CodebaseMap(input HookInput, workDir string, maxDepth int, includePatterns 
 	var m map[string]interface{}
 	if err := json.Unmarshal(input.ToolInput, &m); err == nil {
 		if v, ok := m["stop_hook_active"].(bool); ok && v {
-			return Allow(), 0
+			return NoOp(), 0
 		}
 	}
 
@@ -34,7 +34,7 @@ func CodebaseMap(input HookInput, workDir string, maxDepth int, includePatterns 
 	sessionCacheMu.Lock()
 	if sessionCache[sessionID] {
 		sessionCacheMu.Unlock()
-		return Allow(), 0
+		return NoOp(), 0
 	}
 	sessionCacheMu.Unlock()
 
@@ -48,11 +48,11 @@ func CodebaseMap(input HookInput, workDir string, maxDepth int, includePatterns 
 
 	projectRoot, err := filepath.Abs(cwd)
 	if err != nil {
-		return Allow(), 0
+		return NoOp(), 0
 	}
 
 	if _, err := os.Stat(projectRoot); err != nil {
-		return Allow(), 0
+		return NoOp(), 0
 	}
 
 	if maxDepth == 0 {
@@ -85,7 +85,7 @@ func CodebaseMap(input HookInput, workDir string, maxDepth int, includePatterns 
 	tree := generateTree(projectRoot, maxDepth, includePatterns, projectRoot, 0, "")
 
 	if tree == "" {
-		return Allow(), 0
+		return NoOp(), 0
 	}
 
 	var msg strings.Builder
@@ -104,7 +104,7 @@ func CodebaseMap(input HookInput, workDir string, maxDepth int, includePatterns 
 	sessionCache[sessionID] = true
 	sessionCacheMu.Unlock()
 
-	return AllowMsg(msg.String()), 0
+	return NoOpMsg(msg.String()), 0
 }
 
 func generateTree(root string, maxDepth int, includePatterns []string, projectRoot string, currentDepth int, prefix string) string {

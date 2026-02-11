@@ -6,12 +6,12 @@ import (
 )
 
 var (
-	gitCheckoutRe   = regexp.MustCompile(`\bgit\s+(?:checkout|switch)\s+(\S+)`)
+	gitCheckoutRe    = regexp.MustCompile(`\bgit\s+(?:checkout|switch)\s+(\S+)`)
 	gitCheckoutNewRe = regexp.MustCompile(`\bgit\s+(?:checkout|switch)\s+-[bB]\s`)
-	gitCommitRe     = regexp.MustCompile(`\bgit\s+commit\b`)
-	gitMergeRe      = regexp.MustCompile(`\bgit\s+merge\b`)
-	gitRebaseRe     = regexp.MustCompile(`\bgit\s+rebase\b`)
-	gitReadOnlyRe   = regexp.MustCompile(`\bgit\s+(?:status|log|diff|show|branch|remote|fetch|stash\s+list|tag\s+-l)\b`)
+	gitCommitRe      = regexp.MustCompile(`\bgit\s+commit\b`)
+	gitMergeRe       = regexp.MustCompile(`\bgit\s+merge\b`)
+	gitRebaseRe      = regexp.MustCompile(`\bgit\s+rebase\b`)
+	gitReadOnlyRe    = regexp.MustCompile(`\bgit\s+(?:status|log|diff|show|branch|remote|fetch|stash\s+list|tag\s+-l)\b`)
 )
 
 // BranchGuard is a preToolUse hook that prevents operations on protected branches.

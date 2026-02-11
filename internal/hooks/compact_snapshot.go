@@ -10,7 +10,7 @@ import (
 // CompactSnapshot is a preCompact hook that saves the audit log before compaction.
 func CompactSnapshot(input HookInput, auditDir, snapshotDir string) (HookResult, int) {
 	if err := os.MkdirAll(snapshotDir, 0755); err != nil {
-		return Allow(), 0
+		return NoOp(), 0
 	}
 
 	today := time.Now().Format("2006-01-02")
@@ -18,7 +18,7 @@ func CompactSnapshot(input HookInput, auditDir, snapshotDir string) (HookResult,
 
 	data, err := os.ReadFile(auditFile)
 	if err != nil || len(data) == 0 {
-		return AllowMsg("No audit data to snapshot"), 0
+		return NoOpMsg("No audit data to snapshot"), 0
 	}
 
 	snapshotFile := filepath.Join(snapshotDir,
@@ -29,5 +29,5 @@ func CompactSnapshot(input HookInput, auditDir, snapshotDir string) (HookResult,
 
 	os.WriteFile(snapshotFile, []byte(header+string(data)), 0644)
 
-	return AllowMsg("Context snapshot saved before compaction"), 0
+	return NoOpMsg("Context snapshot saved before compaction"), 0
 }

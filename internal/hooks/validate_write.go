@@ -7,15 +7,15 @@ import (
 )
 
 var (
-	envFileRe       = regexp.MustCompile(`^\.env($|\..+)`)
-	envExemptRe     = regexp.MustCompile(`(?i)\.(example|sample|template)$`)
-	sshKeyRe        = regexp.MustCompile(`(?:id_rsa|id_ed25519|id_ecdsa|id_dsa|authorized_keys)`)
-	certKeyRe       = regexp.MustCompile(`\.(pem|key|p12|pfx|keystore|jks)$`)
-	credentialsRe   = regexp.MustCompile(`(?i)^credentials\.(json|yaml|yml|xml)$`)
-	secretsRe       = regexp.MustCompile(`(?i)^secrets\.(json|yaml|yml|xml)$`)
-	serviceAcctRe   = regexp.MustCompile(`"type".*service_account`)
-	kubeconfigRe    = regexp.MustCompile(`\.kube/config$`)
-	tfvarsRe        = regexp.MustCompile(`\.tfvars$`)
+	envFileRe     = regexp.MustCompile(`^\.env($|\..+)`)
+	envExemptRe   = regexp.MustCompile(`(?i)\.(example|sample|template)$`)
+	sshKeyRe      = regexp.MustCompile(`(?:id_rsa|id_ed25519|id_ecdsa|id_dsa|authorized_keys)`)
+	certKeyRe     = regexp.MustCompile(`\.(pem|key|p12|pfx|keystore|jks)$`)
+	credentialsRe = regexp.MustCompile(`(?i)^credentials\.(json|yaml|yml|xml)$`)
+	secretsRe     = regexp.MustCompile(`(?i)^secrets\.(json|yaml|yml|xml)$`)
+	serviceAcctRe = regexp.MustCompile(`"type".*service_account`)
+	kubeconfigRe  = regexp.MustCompile(`\.kube/config$`)
+	tfvarsRe      = regexp.MustCompile(`\.tfvars$`)
 )
 
 type writeRule struct {

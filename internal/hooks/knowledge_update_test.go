@@ -21,9 +21,9 @@ func TestKnowledgeUpdate_NoTranscriptPath(t *testing.T) {
 
 func TestKnowledgeUpdate_StopHookActive(t *testing.T) {
 	ti, _ := json.Marshal(map[string]interface{}{
-		"transcript_path":   "/path/to/transcript.txt",
-		"stop_hook_active":  true,
-		"session_id":        "test-session",
+		"transcript_path":  "/path/to/transcript.txt",
+		"stop_hook_active": true,
+		"session_id":       "test-session",
 	})
 	input := HookInput{
 		ToolName:  "Stop",
