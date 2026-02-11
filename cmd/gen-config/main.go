@@ -48,9 +48,17 @@ type Allowlists struct {
 	} `yaml:"importGuard,omitempty"`
 }
 
+type Output struct {
+	BinDir    string `yaml:"binDir,omitempty"`
+	CursorDir string `yaml:"cursorDir,omitempty"`
+	ClaudeDir string `yaml:"claudeDir,omitempty"`
+	GlobalDir string `yaml:"globalDir,omitempty"`
+}
+
 type Config struct {
 	Version            int               `yaml:"version"`
 	Env                map[string]string `yaml:"env,omitempty"`
+	Output             *Output           `yaml:"output,omitempty"`
 	Allowlists         *Allowlists       `yaml:"allowlists,omitempty"`
 	SessionStart       []HookEntry       `yaml:"sessionStart"`
 	BeforeSubmitPrompt []HookEntry       `yaml:"beforeSubmitPrompt"`
@@ -61,9 +69,17 @@ type Config struct {
 	SessionEnd         []HookEntry       `yaml:"sessionEnd"`
 }
 
-const binPrefix = "./hooks/bin/"
+var binPrefix = "./hooks/bin/"
 
 func cmd(entry HookEntry) string { return binPrefix + entry.Name }
+
+func expandHome(path string) string {
+	if len(path) == 0 || path[0] != '~' {
+		return path
+	}
+	home, _ := os.UserHomeDir()
+	return filepath.Join(home, path[1:])
+}
 
 func (h HookEntry) included() bool {
 	return h.Enabled == nil || *h.Enabled
@@ -125,6 +141,15 @@ func main() {
 		os.Exit(1)
 	}
 
+	// Resolve binPrefix: config.yaml output.binDir > default
+	if cfg.Output != nil && cfg.Output.BinDir != "" {
+		bp := cfg.Output.BinDir
+		if bp[len(bp)-1] != '/' {
+			bp += "/"
+		}
+		binPrefix = bp
+	}
+
 	binDir := "bin"
 	if configPath == "hooks/config.yaml" {
 		binDir = "hooks/bin"
@@ -134,8 +159,15 @@ func main() {
 		os.Exit(1)
 	}
 
+	// Resolve output dirs: env var > config.yaml > defaults
 	cursorDir := ".cursor"
 	claudeDir := ".claude"
+	if cfg.Output != nil && cfg.Output.CursorDir != "" {
+		cursorDir = cfg.Output.CursorDir
+	}
+	if cfg.Output != nil && cfg.Output.ClaudeDir != "" {
+		claudeDir = cfg.Output.ClaudeDir
+	}
 	if d := os.Getenv("HOOK_CONFIG_CURSOR_DIR"); d != "" {
 		cursorDir = d
 	}
@@ -200,6 +232,21 @@ func main() {
 			os.Exit(1)
 		}
 		fmt.Println("wrote", allowPath)
+	}
+
+	// Optional: write hooks.json to globalDir
+	if cfg.Output != nil && cfg.Output.GlobalDir != "" {
+		globalDir := expandHome(cfg.Output.GlobalDir)
+		globalPath := filepath.Join(globalDir, "hooks.json")
+		if err := os.MkdirAll(globalDir, 0755); err != nil {
+			fmt.Fprintf(os.Stderr, "mkdir: %v\n", err)
+			os.Exit(1)
+		}
+		if err := os.WriteFile(globalPath, cursorJSON, 0644); err != nil {
+			fmt.Fprintf(os.Stderr, "write %s: %v\n", globalPath, err)
+			os.Exit(1)
+		}
+		fmt.Println("wrote", globalPath)
 	}
 }
 

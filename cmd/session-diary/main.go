@@ -21,11 +21,11 @@ func main() {
 	home, _ := os.UserHomeDir()
 	auditDir := os.Getenv("HOOK_AUDIT_DIR")
 	if auditDir == "" {
-		auditDir = filepath.Join(home, ".cursor", "audit")
+		auditDir = filepath.Join(home, ".config", "hooks", "audit")
 	}
 	diaryDir := os.Getenv("HOOK_DIARY_DIR")
 	if diaryDir == "" {
-		diaryDir = filepath.Join(home, ".cursor", "diary")
+		diaryDir = filepath.Join(home, ".config", "hooks", "diary")
 	}
 
 	result, code := hooks.SessionDiary(input, auditDir, diaryDir)

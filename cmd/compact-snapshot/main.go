@@ -21,11 +21,11 @@ func main() {
 	home, _ := os.UserHomeDir()
 	auditDir := os.Getenv("HOOK_AUDIT_DIR")
 	if auditDir == "" {
-		auditDir = filepath.Join(home, ".cursor", "audit")
+		auditDir = filepath.Join(home, ".config", "hooks", "audit")
 	}
 	snapshotDir := os.Getenv("HOOK_SNAPSHOT_DIR")
 	if snapshotDir == "" {
-		snapshotDir = filepath.Join(home, ".cursor", "snapshots")
+		snapshotDir = filepath.Join(home, ".config", "hooks", "snapshots")
 	}
 
 	result, code := hooks.CompactSnapshot(input, auditDir, snapshotDir)

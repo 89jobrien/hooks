@@ -37,7 +37,7 @@ func main() {
 	home, _ := os.UserHomeDir()
 	stateDir := os.Getenv("HOOK_RATE_DIR")
 	if stateDir == "" {
-		stateDir = filepath.Join(home, ".cursor", "rate")
+		stateDir = filepath.Join(home, ".config", "hooks", "rate")
 	}
 
 	result, code := hooks.RateLimiter(input, maxPerMinute, stateDir)

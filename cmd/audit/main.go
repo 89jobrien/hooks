@@ -29,7 +29,7 @@ func main() {
 	auditDir := os.Getenv("HOOK_AUDIT_DIR")
 	if auditDir == "" {
 		home, _ := os.UserHomeDir()
-		auditDir = filepath.Join(home, ".cursor", "audit")
+		auditDir = filepath.Join(home, ".config", "hooks", "audit")
 	}
 
 	result, code := hooks.Audit(input, auditDir)

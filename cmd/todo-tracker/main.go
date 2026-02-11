@@ -29,7 +29,7 @@ func main() {
 	logDir := os.Getenv("HOOK_TODO_DIR")
 	if logDir == "" {
 		home, _ := os.UserHomeDir()
-		logDir = filepath.Join(home, ".cursor", "todos")
+		logDir = filepath.Join(home, ".config", "hooks", "todos")
 	}
 
 	result, code := hooks.TodoTracker(input, logDir)
