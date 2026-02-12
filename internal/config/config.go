@@ -51,10 +51,12 @@ type Allowlists struct {
 }
 
 type Output struct {
-	BinDir    string `yaml:"binDir,omitempty"`
-	CursorDir string `yaml:"cursorDir,omitempty"`
-	ClaudeDir string `yaml:"claudeDir,omitempty"`
-	GlobalDir string `yaml:"globalDir,omitempty"`
+	BinDir      string   `yaml:"binDir,omitempty"`
+	CursorDir   string   `yaml:"cursorDir,omitempty"`
+	ClaudeDir   string   `yaml:"claudeDir,omitempty"`
+	OpenCodeDir string   `yaml:"openCodeDir,omitempty"`
+	GlobalDir   string   `yaml:"globalDir,omitempty"`
+	Backends    []string `yaml:"backends,omitempty"` // e.g. ["cursor","claude","opencode"]; empty = all
 }
 
 type Config struct {
@@ -89,7 +91,7 @@ func (c *Config) Events() []EventEntries {
 	}
 }
 
-// FindConfigPath returns path to config.yaml (hooks/config.yaml or config.yaml) and work dir (repo root or hooks dir).
+// FindConfigPath returns path to config.yaml (hooks/config.yaml, .hooks/config.yaml, or config.yaml) and work dir (repo root).
 // Search starts at cwd and walks up until a config file is found.
 func FindConfigPath() (configPath, workDir string, err error) {
 	dir, err := os.Getwd()
@@ -102,13 +104,17 @@ func FindConfigPath() (configPath, workDir string, err error) {
 		if _, err := os.Stat(p); err == nil {
 			return p, dir, nil
 		}
+		p = filepath.Join(dir, ".hooks", "config.yaml")
+		if _, err := os.Stat(p); err == nil {
+			return p, dir, nil
+		}
 		p = filepath.Join(dir, "config.yaml")
 		if _, err := os.Stat(p); err == nil {
 			return p, dir, nil
 		}
 		parent := filepath.Dir(dir)
 		if parent == dir {
-			return "", "", fmt.Errorf("no hooks/config.yaml or config.yaml found (searched up from %s)", startDir)
+			return "", "", fmt.Errorf("no hooks/config.yaml, .hooks/config.yaml, or config.yaml found (searched up from %s)", startDir)
 		}
 		dir = parent
 	}
@@ -125,6 +131,12 @@ func GlobalHooksPath(override string) string {
 		dir = expandHome(dir)
 	}
 	return filepath.Join(dir, "hooks.json")
+}
+
+// ExpandHome replaces a leading ~ with the user's home directory.
+// Exported for use by cmd/gen-config and other callers.
+func ExpandHome(path string) string {
+	return expandHome(path)
 }
 
 // expandHome replaces a leading ~ with the user's home directory.
