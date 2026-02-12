@@ -50,9 +50,17 @@ type Allowlists struct {
 	} `yaml:"importGuard,omitempty"`
 }
 
+type Output struct {
+	BinDir    string `yaml:"binDir,omitempty"`
+	CursorDir string `yaml:"cursorDir,omitempty"`
+	ClaudeDir string `yaml:"claudeDir,omitempty"`
+	GlobalDir string `yaml:"globalDir,omitempty"`
+}
+
 type Config struct {
 	Version            int               `yaml:"version"`
 	Env                map[string]string `yaml:"env,omitempty"`
+	Output             *Output           `yaml:"output,omitempty"`
 	Allowlists         *Allowlists       `yaml:"allowlists,omitempty"`
 	SessionStart       []HookEntry       `yaml:"sessionStart"`
 	BeforeSubmitPrompt []HookEntry       `yaml:"beforeSubmitPrompt"`
@@ -106,10 +114,26 @@ func FindConfigPath() (configPath, workDir string, err error) {
 	}
 }
 
-// GlobalHooksPath returns the global hooks.json path (~/.cursor/hooks.json).
-func GlobalHooksPath() string {
+// GlobalHooksPath returns the global hooks.json path.
+// If override is non-empty, it is used (with ~ expanded); otherwise ~/.cursor/hooks.json.
+func GlobalHooksPath(override string) string {
+	dir := override
+	if dir == "" {
+		home, _ := os.UserHomeDir()
+		dir = filepath.Join(home, ".cursor")
+	} else {
+		dir = expandHome(dir)
+	}
+	return filepath.Join(dir, "hooks.json")
+}
+
+// expandHome replaces a leading ~ with the user's home directory.
+func expandHome(path string) string {
+	if len(path) == 0 || path[0] != '~' {
+		return path
+	}
 	home, _ := os.UserHomeDir()
-	return filepath.Join(home, ".cursor", "hooks.json")
+	return filepath.Join(home, path[1:])
 }
 
 // Load reads config from path.

@@ -22,15 +22,17 @@ func main() {
 
 func runScan() {
 	fmt.Println("=== Project hooks ===")
+	var cfg *config.Config
 	configPath, workDir, err := config.FindConfigPath()
 	if err != nil {
 		fmt.Println("  (none found)")
 	} else {
 		fmt.Printf("  Config: %s\n", configPath)
 		fmt.Printf("  Work dir: %s\n", workDir)
-		cfg, err := config.Load(configPath)
+		cfg, err = config.Load(configPath)
 		if err != nil {
 			fmt.Printf("  Error loading config: %v\n", err)
+			cfg = nil
 		} else {
 			var n int
 			for _, ev := range cfg.Events() {
@@ -49,7 +51,11 @@ func runScan() {
 	}
 
 	fmt.Println("\n=== Global hooks ===")
-	globalPath := config.GlobalHooksPath()
+	var globalOverride string
+	if cfg != nil && cfg.Output != nil {
+		globalOverride = cfg.Output.GlobalDir
+	}
+	globalPath := config.GlobalHooksPath(globalOverride)
 	if info, err := os.Stat(globalPath); err == nil && !info.IsDir() {
 		fmt.Printf("  %s (present)\n", globalPath)
 	} else {

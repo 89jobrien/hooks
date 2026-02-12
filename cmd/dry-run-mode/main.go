@@ -31,7 +31,7 @@ func main() {
 	home, _ := os.UserHomeDir()
 	logDir := os.Getenv("HOOK_DRY_RUN_DIR")
 	if logDir == "" {
-		logDir = filepath.Join(home, ".cursor", "dry-run")
+		logDir = filepath.Join(home, ".config", "hooks", "dry-run")
 	}
 
 	result, code := hooks.DryRunMode(input, enabled, logDir)

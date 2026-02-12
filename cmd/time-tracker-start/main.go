@@ -21,7 +21,7 @@ func main() {
 	home, _ := os.UserHomeDir()
 	logDir := os.Getenv("HOOK_TIME_DIR")
 	if logDir == "" {
-		logDir = filepath.Join(home, ".cursor", "time")
+		logDir = filepath.Join(home, ".config", "hooks", "time")
 	}
 
 	result, code := hooks.TimeTracker(input, "start", logDir)

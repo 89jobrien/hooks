@@ -29,7 +29,7 @@ func main() {
 	home, _ := os.UserHomeDir()
 	logDir := os.Getenv("HOOK_COST_DIR")
 	if logDir == "" {
-		logDir = filepath.Join(home, ".cursor", "cost")
+		logDir = filepath.Join(home, ".config", "hooks", "cost")
 	}
 
 	result, code := hooks.CostEstimator(input, logDir)

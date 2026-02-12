@@ -4,6 +4,13 @@
 
 version: 1
 
+# Output paths for generated config files
+# output:
+#   binDir: ./hooks/bin     # Command prefix for hook binaries in generated JSON
+#   cursorDir: .cursor      # Repo-level Cursor output directory
+#   claudeDir: .claude      # Repo-level Claude output directory
+#   globalDir: ~/.cursor    # Global install target (absolute path, ~ expanded)
+
 # Optional: per-hook env. Written to .cursor/hooks.env; source it before Cursor to apply.
 # env:
 #   HOOK_MAX_FILE_LINES: "500"

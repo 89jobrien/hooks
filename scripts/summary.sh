@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# Print audit and cost summary. Uses HOOK_AUDIT_DIR and HOOK_COST_DIR or ~/.cursor/audit and ~/.cursor/cost.
+# Print audit and cost summary. Uses HOOK_AUDIT_DIR and HOOK_COST_DIR or ~/.config/hooks/audit and ~/.config/hooks/cost.
 # Audit: line count from log files modified in last 24h (approximate). Cost: sum of tokens from cost.log.
 set -euo pipefail
-AUDIT_DIR="${HOOK_AUDIT_DIR:-$HOME/.cursor/audit}"
-COST_DIR="${HOOK_COST_DIR:-$HOME/.cursor/cost}"
+AUDIT_DIR="${HOOK_AUDIT_DIR:-$HOME/.config/hooks/audit}"
+COST_DIR="${HOOK_COST_DIR:-$HOME/.config/hooks/cost}"
 calls=0
 tokens=0
 
