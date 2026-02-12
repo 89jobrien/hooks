@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.1](https://github.com/89jobrien/hooks/compare/hooks-v0.3.0...hooks-v0.3.1) (2026-02-12)
+
+
+### Bug Fixes
+
+* use absolute paths for hook binaries and harden CI ([11203c1](https://github.com/89jobrien/hooks/commit/11203c13f480cfb59ea9ac5f938c3f97fcf9e259))
+* use absolute paths for hook binaries and harden CI ([bc7b22f](https://github.com/89jobrien/hooks/commit/bc7b22faaa0f8b5e5230ea19e9acb8d863d44628))
+
 ## [0.3.0](https://github.com/89jobrien/hooks/compare/hooks-v0.2.0...hooks-v0.3.0) (2026-02-12)
 
 
