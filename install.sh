@@ -35,4 +35,6 @@ cd "$TARGET"
 .hooks/bin/gen-config
 
 echo "installed to $TARGET/.hooks; wrote $TARGET/.cursor/ and $TARGET/.claude/"
-[[ -f "$TARGET/.cursor/hooks.env" ]] && echo "optional: source $TARGET/.cursor/hooks.env"
+if [[ -f "$TARGET/.cursor/hooks.env" ]]; then
+  echo "optional: source $TARGET/.cursor/hooks.env"
+fi
