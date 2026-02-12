@@ -122,34 +122,51 @@ func main() {
 	if d := os.Getenv("HOOK_CONFIG_CLAUDE_DIR"); d != "" {
 		claudeDir = d
 	}
+	openCodeDir := ".opencode"
+	if cfg.Output != nil && cfg.Output.OpenCodeDir != "" {
+		openCodeDir = cfg.Output.OpenCodeDir
+	}
+	if d := os.Getenv("HOOK_CONFIG_OPENCODE_DIR"); d != "" {
+		openCodeDir = d
+	}
+	backends := cfg.Output
+	if backends == nil {
+		backends = &config.Output{}
+	}
+	wantCursor := wantBackend(backends.Backends, "cursor")
+	wantClaude := wantBackend(backends.Backends, "claude")
+	wantOpenCode := wantBackend(backends.Backends, "opencode") && openCodeDir != ""
 
-	// Cursor .cursor/hooks.json
-	cursor := cursorConfig(cfg)
-	cursorPath := filepath.Join(cursorDir, "hooks.json")
-	if err := os.MkdirAll(filepath.Dir(cursorPath), 0755); err != nil {
-		fmt.Fprintf(os.Stderr, "mkdir: %v\n", err)
-		os.Exit(1)
+	var cursorJSON []byte
+	if wantCursor {
+		cursor := cursorConfig(cfg)
+		cursorPath := filepath.Join(cursorDir, "hooks.json")
+		if err := os.MkdirAll(filepath.Dir(cursorPath), 0755); err != nil {
+			fmt.Fprintf(os.Stderr, "mkdir: %v\n", err)
+			os.Exit(1)
+		}
+		cursorJSON, _ = json.MarshalIndent(cursor, "", "  ")
+		if err := os.WriteFile(cursorPath, cursorJSON, 0644); err != nil {
+			fmt.Fprintf(os.Stderr, "write %s: %v\n", cursorPath, err)
+			os.Exit(1)
+		}
+		fmt.Println("wrote", cursorPath)
 	}
-	cursorJSON, _ := json.MarshalIndent(cursor, "", "  ")
-	if err := os.WriteFile(cursorPath, cursorJSON, 0644); err != nil {
-		fmt.Fprintf(os.Stderr, "write %s: %v\n", cursorPath, err)
-		os.Exit(1)
-	}
-	fmt.Println("wrote", cursorPath)
 
-	// Claude .claude/settings.json
-	claude := claudeConfig(cfg)
-	claudePath := filepath.Join(claudeDir, "settings.json")
-	if err := os.MkdirAll(filepath.Dir(claudePath), 0755); err != nil {
-		fmt.Fprintf(os.Stderr, "mkdir: %v\n", err)
-		os.Exit(1)
+	if wantClaude {
+		claude := claudeConfig(cfg)
+		claudePath := filepath.Join(claudeDir, "settings.json")
+		if err := os.MkdirAll(filepath.Dir(claudePath), 0755); err != nil {
+			fmt.Fprintf(os.Stderr, "mkdir: %v\n", err)
+			os.Exit(1)
+		}
+		claudeJSON, _ := json.MarshalIndent(claude, "", "  ")
+		if err := os.WriteFile(claudePath, claudeJSON, 0644); err != nil {
+			fmt.Fprintf(os.Stderr, "write %s: %v\n", claudePath, err)
+			os.Exit(1)
+		}
+		fmt.Println("wrote", claudePath)
 	}
-	claudeJSON, _ := json.MarshalIndent(claude, "", "  ")
-	if err := os.WriteFile(claudePath, claudeJSON, 0644); err != nil {
-		fmt.Fprintf(os.Stderr, "write %s: %v\n", claudePath, err)
-		os.Exit(1)
-	}
-	fmt.Println("wrote", claudePath)
 
 	// Optional .cursor/hooks.env from config.env
 	if len(cfg.Env) > 0 {
@@ -182,8 +199,8 @@ func main() {
 		fmt.Println("wrote", allowPath)
 	}
 
-	// Optional: write hooks.json to globalDir
-	if cfg.Output != nil && cfg.Output.GlobalDir != "" {
+	// Optional: write hooks.json to globalDir (uses same content as Cursor)
+	if wantCursor && cfg.Output != nil && cfg.Output.GlobalDir != "" && len(cursorJSON) > 0 {
 		globalDir := config.ExpandHome(cfg.Output.GlobalDir)
 		globalPath := filepath.Join(globalDir, "hooks.json")
 		if err := os.MkdirAll(globalDir, 0755); err != nil {
@@ -196,7 +213,137 @@ func main() {
 		}
 		fmt.Println("wrote", globalPath)
 	}
+
+	if wantOpenCode {
+		writeOpenCodeOutput(cfg, openCodeDir)
+	}
 }
+
+// wantBackend returns true if backends is empty (all) or contains name.
+func wantBackend(backends []string, name string) bool {
+	if len(backends) == 0 {
+		return true
+	}
+	for _, b := range backends {
+		if b == name {
+			return true
+		}
+	}
+	return false
+}
+
+func writeOpenCodeOutput(cfg config.Config, openCodeDir string) {
+	manifest := openCodeManifest(cfg)
+	pluginsDir := filepath.Join(openCodeDir, "plugins")
+	if err := os.MkdirAll(pluginsDir, 0755); err != nil {
+		fmt.Fprintf(os.Stderr, "mkdir %s: %v\n", pluginsDir, err)
+		os.Exit(1)
+	}
+	manifestPath := filepath.Join(openCodeDir, "hooks-manifest.json")
+	manifestJSON, _ := json.MarshalIndent(manifest, "", "  ")
+	if err := os.WriteFile(manifestPath, manifestJSON, 0644); err != nil {
+		fmt.Fprintf(os.Stderr, "write %s: %v\n", manifestPath, err)
+		os.Exit(1)
+	}
+	fmt.Println("wrote", manifestPath)
+	adapterPath := filepath.Join(pluginsDir, "cursor-hooks-adapter.js")
+	if err := os.WriteFile(adapterPath, []byte(openCodeAdapterJS), 0644); err != nil {
+		fmt.Fprintf(os.Stderr, "write %s: %v\n", adapterPath, err)
+		os.Exit(1)
+	}
+	fmt.Println("wrote", adapterPath)
+}
+
+func openCodeManifest(cfg config.Config) map[string]interface{} {
+	hookEntries := func(entries []config.HookEntry) []map[string]interface{} {
+		out := make([]map[string]interface{}, 0, len(entries))
+		for _, e := range filterEntries(entries) {
+			m := map[string]interface{}{"command": cmd(e)}
+			if e.Matcher != "" {
+				m["matcher"] = e.Matcher
+			} else {
+				m["matcher"] = ".*"
+			}
+			out = append(out, m)
+		}
+		return out
+	}
+	return map[string]interface{}{
+		"preToolUse":  hookEntries(cfg.PreToolUse),
+		"postToolUse": hookEntries(cfg.PostToolUse),
+	}
+}
+
+// openCodeAdapterJS is the OpenCode plugin that invokes hook binaries from the manifest.
+const openCodeAdapterJS = `// Generated by hooks gen-config. Adapter for Cursor-style hooks (preToolUse/postToolUse).
+import path from "path";
+import fs from "fs";
+import { spawn } from "child_process";
+import { fileURLToPath } from "url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const OPENCODE_DIR = path.join(__dirname, "..");
+
+const OPCODE_TO_CONTRACT = { bash: "Shell", write: "Write", read: "Read", edit: "Edit" };
+
+function loadManifest() {
+  const p = path.join(OPENCODE_DIR, "hooks-manifest.json");
+  try {
+    return JSON.parse(fs.readFileSync(p, "utf8"));
+  } catch (e) {
+    return null;
+  }
+}
+
+async function runHooks(manifestKey, toolNameContract, toolInput, directory) {
+  const manifest = loadManifest();
+  if (!manifest || !manifest[manifestKey] || !Array.isArray(manifest[manifestKey])) return;
+  const stdin = JSON.stringify({ tool_name: toolNameContract, tool_input: toolInput }) + "\n";
+  for (const hook of manifest[manifestKey]) {
+    const matcher = hook.matcher || ".*";
+    if (matcher !== ".*" && matcher !== toolNameContract) continue;
+    const cmd = hook.command;
+    const bin = path.isAbsolute(cmd) ? cmd : path.join(directory, cmd.replace(/^\\.\\//, ""));
+    const proc = spawn(bin, [], { stdio: ["pipe", "pipe", "inherit"], cwd: directory, shell: false });
+    let out = "";
+    proc.stdout.on("data", (chunk) => { out += chunk; });
+    proc.stdin.end(stdin);
+    await new Promise((resolve, reject) => {
+      proc.on("close", (code) => {
+        if (code === 2) reject(new Error("Hook blocked (exit 2)"));
+        else if (code !== 0) resolve();
+        else {
+          try {
+            const res = JSON.parse(out.split("` + "\\n" + `")[0] || "{}");
+            if (res.decision === "deny") reject(new Error(res.reason || "Hook denied"));
+            else resolve();
+          } catch (e) {
+            resolve();
+          }
+        }
+      });
+    });
+  }
+}
+
+export const CursorHooksAdapter = async ({ directory }) => {
+  const dir = directory || process.cwd();
+  return {
+    "tool.execute.before": async (input, output) => {
+      const tool = input.tool;
+      const contractName = OPCODE_TO_CONTRACT[tool] || tool;
+      const toolInput = output.args || {};
+      await runHooks("preToolUse", contractName, toolInput, dir);
+    },
+    "tool.execute.after": async (input, output) => {
+      const tool = input.tool;
+      const contractName = OPCODE_TO_CONTRACT[tool] || tool;
+      const toolInput = output.args || {};
+      await runHooks("postToolUse", contractName, toolInput, dir);
+    },
+  };
+};
+`
 
 func hasAnyAllowlist(a *config.Allowlists) bool {
 	if a == nil {
