@@ -15,7 +15,7 @@ BINS := $(addprefix $(BINDIR)/,$(CMDS))
 # Install hooks binary to PREFIX/bin (default ~/.local so ~/.local/bin/hooks is on PATH).
 PREFIX ?= $(HOME)/.local
 
-.PHONY: all test clean config summary install docker-build docker-run
+.PHONY: all test clean config summary install docker-build docker-run list
 
 all: $(BINS)
 
@@ -51,3 +51,15 @@ docker-build:
 
 docker-run:
 	docker run --rm ghcr.io/89jobrien/hooks:local audit
+
+list:
+	@echo "Available targets:"
+	@echo "  all          - Build all hook binaries"
+	@echo "  install      - Install binaries to PREFIX/bin (default ~/.local/bin)"
+	@echo "  config       - Generate .cursor/hooks.json and .claude/settings.json"
+	@echo "  summary      - Print audit/cost summary"
+	@echo "  test         - Run Go tests"
+	@echo "  clean        - Remove bin/ directory"
+	@echo "  docker-build - Build Docker image"
+	@echo "  docker-run   - Run Docker container"
+	@echo "  list         - Show this help"
