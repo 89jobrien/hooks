@@ -85,7 +85,7 @@ docker run --rm ghcr.io/89jobrien/hooks:local audit
 - **Source of truth**: `hooks/config.yaml` (YAML). Edit this; do not edit the JSON by hand.
 - **Disable a hook**: set `enabled: false` on that entry (object form). Omitted from generated JSON and not validated as a binary.
 - **Interactive mode**: run `./hooks/bin/interactive` from repo root (or `bin/interactive` from inside hooks). Use the menu to toggle hooks on/off (`t <n>`), then `s` to save and run gen-config, which regenerates `.cursor/hooks.json` and `.claude/settings.json`. Use `q` to quit without saving.
-- **Generate**: from repo root run `make -C hooks config` (after `make -C hooks all`). Writes:
+- **Generate**: from repo root run `make -C hooks config` (after `make -C hooks all`) for hooks-as-subdir, or `./.hooks/bin/gen-config` for installed `.hooks/` layout. Writes:
  - `.cursor/hooks.json` (Cursor)
  - `.claude/settings.json` (Claude; enable Third-party skills in Cursor)
  - `.cursor/hooks.env` (only if `env:` is set in config.yaml; source before Cursor to set per-hook env)
@@ -101,11 +101,19 @@ In `config.yaml` add an optional top-level `env:` map. Keys are env var names (e
 
 ## Install into another repo
 
-From this repo root: `./hooks/install.sh /path/to/target/repo`. Copies `hooks/` into the target repo, runs `make -C hooks all` and `make -C hooks config` there. Optional: source the target repo’s `.cursor/hooks.env` before Cursor.
+From this repo root: `./install.sh /path/to/target/repo`. install.sh builds here, copies only `bin/` and `config.yaml` into `target/.hooks/`, then runs `target/.hooks/bin/gen-config`. To regenerate later from the target repo: `./.hooks/bin/gen-config` from target root. Optional: source the target repo’s `.cursor/hooks.env` before Cursor.
+
+**Setup layouts:**
+
+- **Installed copy** (install.sh): config at `.hooks/config.yaml`, binaries in `.hooks/bin/`. Regen with `./.hooks/bin/gen-config` from repo root.
+- **Hooks as subdirectory** (e.g. submodule at `hooks/`): config at `hooks/config.yaml`, binaries in `hooks/bin/`. Regen with `make -C hooks config` from repo root. `sync-config.sh` is for this layout.
 
 ## Sync config after editing YAML
 
-Run `./hooks/scripts/sync-config.sh` from repo root (or `make -C hooks config`). If you use [pre-commit](https://pre-commit.com/), add a hook that runs when `hooks/config.yaml` changes: `bash hooks/scripts/sync-config.sh`.
+- **Hooks as subdir**: run `./hooks/scripts/sync-config.sh` from repo root or `make -C hooks config`.
+- **Installed `.hooks/` layout**: run `./.hooks/bin/gen-config` from repo root.
+
+If you use [pre-commit](https://pre-commit.com/), add a hook that runs when config changes: for subdir use `bash hooks/scripts/sync-config.sh`; for `.hooks/` use `./.hooks/bin/gen-config`.
 
 ## Summary (audit / cost)
 

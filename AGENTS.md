@@ -11,20 +11,79 @@
 ## Build, Test, and Development Commands
 - `make all`: build all hook binaries into `bin/`.
 - `make test`: run Go tests (`go test -v -count=1 ./...`).
-- `make config`: generate `.cursor/hooks.json`, `.claude/settings.json`, and optional `.cursor/hooks.env` (run from repo root: `make -C hooks config`).
+- `make config`: generate `.cursor/hooks.json`, `.claude/settings.json`, and optional `.cursor/hooks.env` (from this repo: `make config`; from a repo with hooks as subdir: `make -C hooks config`; for install.sh layout: `./.hooks/bin/gen-config`).
 - `make summary`: print recent audit/cost summary (uses `~/.cursor/*` by default).
 - `make clean`: remove `bin/`.
+- `make install`: install `hooks` and `gen-config` to `~/.local/bin` (so `hooks init` works).
+
+### Running Single Tests
+- `go test -v -run TestFunctionName ./internal/hooks`: run specific test function
+- `go test -v ./internal/hooks -run TestHookName`: run tests for specific hook
+- `go test -v ./internal/hooks/<hook>_test.go`: run all tests in a specific test file
+- Use `-count=1` to disable test caching when needed
 
 ## Coding Style & Naming Conventions
 - Go code follows `gofmt`; run it before committing.
 - Keep all hook logic in `internal/hooks` (single `hooks` package). Avoid adding new packages for hooks.
 - File naming: one hook per file pair (`<hook>.go` + `<hook>_test.go`).
 - Binary naming: `cmd/<hook-name>/main.go` (kebab-case directory names).
+- Use kebab-case for hook names in `cmd/` directories, PascalCase for Go functions/types.
+- Environment variables use `HOOK_` prefix (e.g., `HOOK_AUDIT_DIR`).
+
+### Import Style
+- Group imports into standard library, third-party, then local (hooks/internal) packages
+- Use blank imports (`_`) only when necessary for side effects
+
+### Type Conventions
+- Hook functions return `(HookResult, int)` where the int is the exit code
+- Use the helper functions: `Allow()`, `AllowMsg()`, `Deny()`, `NoOp()`, `NoOpMsg()`
+- HookInput provides extraction methods: `.Command()`, `.Path()`, `.Contents()`, `.Pattern()`, `.Prompt()`
+
+### Error Handling
+- Fail open on parse errors - return `{"decision": "allow"}` and exit 0
+- Use `fmt.Errorf` with `%w` for error wrapping
+- Prefer early returns and minimal error nesting
 
 ## Testing Guidelines
-- Use Go’s standard testing package; tests live alongside hooks in `internal/hooks/`.
+- Use Go's standard testing package; tests live alongside hooks in `internal/hooks/`.
 - Prefer table-driven tests (see existing `*_test.go` files).
+- Use `t.TempDir()` for temporary directories in tests.
+- Test helper functions like `shellInput()`, `writeInput()` for common HookInput creation.
 - No explicit coverage target is documented; keep tests focused on behavior and edge cases.
+
+## Hook Implementation Patterns
+
+### Simple Hook Structure
+```go
+func HookName(input HookInput) (HookResult, int) {
+    if hooks.IsHookDisabled("hook-name") {
+        return Allow(), 0
+    }
+    
+    // Hook logic here
+    
+    return Allow(), 0  // or Deny(reason), exitCode
+}
+```
+
+### Thin Binary Pattern
+Prefer the `hooks.RunOrDisabled()` wrapper in `cmd/<hook>/main.go`:
+```go
+package main
+import "hooks/internal/hooks"
+func main() {
+    hooks.RunOrDisabled("hook-name", hooks.HookName)
+}
+```
+
+### Rules-Based Hooks
+For validation hooks, define rule structs with check functions and reasons:
+```go
+type writeRule struct {
+    check  func(path, basename, contents string) bool
+    reason string
+}
+```
 
 ## Commit & Pull Request Guidelines
 - Git history is not available in this workspace, so no repository-specific commit pattern can be inferred.
@@ -34,3 +93,4 @@
 ## Configuration Notes
 - Edit `config.yaml` only; generated JSON files are outputs.
 - Optional environment overrides live in `.cursor/hooks.env` (created by `make config`). Source it before running Cursor if needed (example: `source .cursor/hooks.env && cursor .`).
+- Use `HOOK_DISABLED` environment variable to disable specific hooks (comma-separated list).
