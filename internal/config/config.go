@@ -51,10 +51,12 @@ type Allowlists struct {
 }
 
 type Output struct {
-	BinDir    string `yaml:"binDir,omitempty"`
-	CursorDir string `yaml:"cursorDir,omitempty"`
-	ClaudeDir string `yaml:"claudeDir,omitempty"`
-	GlobalDir string `yaml:"globalDir,omitempty"`
+	BinDir      string   `yaml:"binDir,omitempty"`
+	CursorDir   string   `yaml:"cursorDir,omitempty"`
+	ClaudeDir   string   `yaml:"claudeDir,omitempty"`
+	OpenCodeDir string   `yaml:"openCodeDir,omitempty"`
+	GlobalDir   string   `yaml:"globalDir,omitempty"`
+	Backends    []string `yaml:"backends,omitempty"` // e.g. ["cursor","claude","opencode"]; empty = all
 }
 
 type Config struct {

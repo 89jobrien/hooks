@@ -1,6 +1,7 @@
 /bin/
 /.cursor/
 /.claude/
+/.opencode/
 /.idea/
 /.vscode/
 *.out

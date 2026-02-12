@@ -4,7 +4,9 @@
 [![release-please](https://github.com/89jobrien/hooks/actions/workflows/release-please.yml/badge.svg)](https://github.com/89jobrien/hooks/actions/workflows/release-please.yml)
 [![docker-publish](https://github.com/89jobrien/hooks/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/89jobrien/hooks/actions/workflows/docker-publish.yml)
 
-Go hooks for Cursor/Claude: security, quality, and session lifecycle.
+Go hooks for Cursor/Claude and other agents: security, quality, and session lifecycle.
+
+**Supported agents:** Cursor (including when using the Codex model), Claude in Cursor, and OpenCode via the generated adapter plugin. The same hook binaries and contract work across agents. See [docs/hook-contract.md](docs/hook-contract.md) for the stdin/stdout/exit contract and tool-name mapping.
 
 Codebase layout and conventions: [STRUCTURE.md](STRUCTURE.md).
 
@@ -13,7 +15,7 @@ Codebase layout and conventions: [STRUCTURE.md](STRUCTURE.md).
 ```bash
 make all # build 26 binaries (hooks + gen-config + interactive) to bin/
 make test # run tests (~0.5s)
-make config # from repo root: generate .cursor/hooks.json, .claude/settings.json, and (if env in config) .cursor/hooks.env. Requires bin/ built first (make all).
+make config # from repo root: generate .cursor/hooks.json, .claude/settings.json, .opencode/ (manifest + adapter plugin), and (if env in config) .cursor/hooks.env. Requires bin/ built first (make all).
 make clean # remove bin/
 ```
 
@@ -85,10 +87,12 @@ docker run --rm ghcr.io/89jobrien/hooks:local audit
 - **Source of truth**: `hooks/config.yaml` (YAML). Edit this; do not edit the JSON by hand.
 - **Disable a hook**: set `enabled: false` on that entry (object form). Omitted from generated JSON and not validated as a binary.
 - **Interactive mode**: run `./hooks/bin/interactive` from repo root (or `bin/interactive` from inside hooks). Use the menu to toggle hooks on/off (`t <n>`), then `s` to save and run gen-config, which regenerates `.cursor/hooks.json` and `.claude/settings.json`. Use `q` to quit without saving.
-- **Generate**: from repo root run `make -C hooks config` (after `make -C hooks all`) for hooks-as-subdir, or `./.hooks/bin/gen-config` for installed `.hooks/` layout. Writes:
+- **Generate**: from repo root run `make -C hooks config` (after `make -C hooks all`) for hooks-as-subdir, or `./.hooks/bin/gen-config` for installed `.hooks/` layout. By default writes:
  - `.cursor/hooks.json` (Cursor)
  - `.claude/settings.json` (Claude; enable Third-party skills in Cursor)
+ - `.opencode/hooks-manifest.json` and `.opencode/plugins/cursor-hooks-adapter.js` (OpenCode; preToolUse/postToolUse via plugin)
  - `.cursor/hooks.env` (only if `env:` is set in config.yaml; source before Cursor to set per-hook env)
+- **Backends**: optional `output.backends: [cursor, claude, opencode]` in config limits which outputs are generated; empty = all. Optional `output.openCodeDir` (default `.opencode`) sets the OpenCode output directory.
 - **Validation**: gen-config checks that every hook name in config has a binary under `hooks/bin/`. Run `make all` before `make config`.
 
 ## Externalized allowlists (YAML)
