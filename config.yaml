@@ -5,8 +5,8 @@
 version: 1
 
 # Output paths for generated config files
-# output:
-#   binDir: ./hooks/bin     # Command prefix for hook binaries in generated JSON
+output:
+  binDir: ~/.local/bin      # Command prefix for hook binaries in generated JSON
 #   cursorDir: .cursor      # Repo-level Cursor output directory
 #   claudeDir: .claude      # Repo-level Claude output directory
 #   globalDir: ~/.cursor    # Global install target (absolute path, ~ expanded)

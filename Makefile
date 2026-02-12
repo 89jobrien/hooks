@@ -19,11 +19,10 @@ PREFIX ?= $(HOME)/.local
 
 all: $(BINS)
 
-install: $(BINDIR)/hooks $(BINDIR)/gen-config
+install: all
 	@mkdir -p $(PREFIX)/bin
-	install -m 755 $(BINDIR)/hooks $(PREFIX)/bin/hooks
-	install -m 755 $(BINDIR)/gen-config $(PREFIX)/bin/gen-config
-	@echo "installed $(PREFIX)/bin/hooks and $(PREFIX)/bin/gen-config — ensure $(PREFIX)/bin is on your PATH"
+	@for f in $(BINS); do install -m 755 $$f $(PREFIX)/bin/$$(basename $$f); done
+	@echo "installed $(words $(BINS)) binaries to $(PREFIX)/bin — ensure $(PREFIX)/bin is on your PATH"
 
 # Generate .cursor/hooks.json and .claude/settings.json. Writes to cwd (repo root).
 # From this repo: make config. From a repo that has hooks as subdir: make -C hooks config.
