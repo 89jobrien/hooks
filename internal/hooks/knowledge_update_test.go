@@ -14,8 +14,12 @@ func TestKnowledgeUpdate_NoTranscriptPath(t *testing.T) {
 		ToolInput: []byte(`{}`),
 	}
 	result, code := KnowledgeUpdate(input, ".")
-	if code != 0 || result.Decision != "allow" {
-		t.Errorf("expected allow when no transcript path, got decision=%s code=%d", result.Decision, code)
+	if code != 0 {
+		t.Errorf("expected exit 0 when no transcript path, got code=%d", code)
+	}
+	// Stop hook uses NoOp (no decision)
+	if result.Decision != "" {
+		t.Errorf("expected no decision (NoOp), got decision=%s", result.Decision)
 	}
 }
 
@@ -30,8 +34,11 @@ func TestKnowledgeUpdate_StopHookActive(t *testing.T) {
 		ToolInput: ti,
 	}
 	result, code := KnowledgeUpdate(input, ".")
-	if code != 0 || result.Decision != "allow" {
-		t.Errorf("expected allow when stop_hook_active is true, got decision=%s code=%d", result.Decision, code)
+	if code != 0 {
+		t.Errorf("expected exit 0 when stop_hook_active, got code=%d", code)
+	}
+	if result.Decision != "" {
+		t.Errorf("expected no decision (NoOp), got decision=%s", result.Decision)
 	}
 }
 
@@ -56,8 +63,11 @@ func TestKnowledgeUpdate_NoAPIKey(t *testing.T) {
 	}
 
 	result, code := KnowledgeUpdate(input, dir)
-	if code != 0 || result.Decision != "allow" {
-		t.Errorf("expected allow when no API key, got decision=%s code=%d", result.Decision, code)
+	if code != 0 {
+		t.Errorf("expected exit 0 when no API key, got code=%d", code)
+	}
+	if result.Decision != "" {
+		t.Errorf("expected no decision (NoOp), got decision=%s", result.Decision)
 	}
 }
 
@@ -72,8 +82,11 @@ func TestKnowledgeUpdate_NonexistentTranscript(t *testing.T) {
 	}
 
 	result, code := KnowledgeUpdate(input, ".")
-	if code != 0 || result.Decision != "allow" {
-		t.Errorf("expected allow for nonexistent transcript, got decision=%s code=%d", result.Decision, code)
+	if code != 0 {
+		t.Errorf("expected exit 0 for nonexistent transcript, got code=%d", code)
+	}
+	if result.Decision != "" {
+		t.Errorf("expected no decision (NoOp), got decision=%s", result.Decision)
 	}
 }
 
@@ -150,6 +163,30 @@ func TestSaveKnowledgeUpdate_CreatesDirectory(t *testing.T) {
 	// Verify file exists in that directory
 	if !strings.Contains(updatePath, knowledgeDir) {
 		t.Errorf("update file not in knowledge directory: %s", updatePath)
+	}
+}
+
+func TestSaveKnowledgeUpdate_PerRepoSubdir(t *testing.T) {
+	homeDir := t.TempDir()
+	originalHome := os.Getenv("HOME")
+	os.Setenv("HOME", homeDir)
+	defer os.Setenv("HOME", originalHome)
+
+	entities := knowledgeEntities{
+		FilesCreated: []string{"a.go"},
+	}
+	// Use a dir that will yield a distinct repo name (temp dir base)
+	dir := t.TempDir()
+	updatePath, err := saveKnowledgeUpdate(entities, dir, "s1")
+	if err != nil {
+		t.Fatalf("saveKnowledgeUpdate failed: %v", err)
+	}
+
+	base := filepath.Join(homeDir, "logs", "claude", "knowledge-updates")
+	repoName := filepath.Base(dir)
+	expectedPrefix := filepath.Join(base, repoName)
+	if !strings.HasPrefix(updatePath, expectedPrefix) {
+		t.Errorf("expected path under %s, got %s", expectedPrefix, updatePath)
 	}
 }
 

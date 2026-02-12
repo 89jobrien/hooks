@@ -5,10 +5,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Build & Test Commands
 
 ```bash
-make all              # Build all hook binaries to bin/
-make test             # Run tests: go test -v -count=1 ./...
-make config           # Generate .cursor/hooks.json and .claude/settings.json from config.yaml
-make clean            # Remove bin/
+make all # Build all hook binaries to bin/
+make test # Run tests: go test -v -count=1 ./...
+make config # Generate .cursor/hooks.json and .claude/settings.json from config.yaml
+make clean # Remove bin/
 
 # Run a single test
 go test -v -run TestValidateShell_Blocks ./internal/hooks/

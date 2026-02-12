@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"time"
@@ -41,17 +42,17 @@ type knowledgeUpdate struct {
 func KnowledgeUpdate(input HookInput, workDir string) (HookResult, int) {
 	transcriptPath := input.TranscriptPath()
 	if transcriptPath == "" {
-		return Allow(), 0
+		return NoOp(), 0
 	}
 
 	// Check if stop_hook_active is set
 	if input.StopHookActive() {
-		return Allow(), 0
+		return NoOp(), 0
 	}
 
 	apiKey := os.Getenv("OPENAI_API_KEY")
 	if apiKey == "" {
-		return Allow(), 0 // Fail silently if no API key
+		return NoOp(), 0 // Fail silently if no API key
 	}
 
 	sessionID := input.SessionID()
@@ -70,27 +71,29 @@ func KnowledgeUpdate(input HookInput, workDir string) (HookResult, int) {
 	// Read transcript
 	transcript, err := os.ReadFile(transcriptPath)
 	if err != nil {
-		return Allow(), 0 // Fail silently
+		return NoOp(), 0 // Fail silently
 	}
 
 	// Call OpenAI to extract entities
 	entities, err := extractEntitiesWithLLM(string(transcript), apiKey)
 	if err != nil {
-		return Allow(), 0 // Fail silently
+		return NoOp(), 0 // Fail silently
 	}
 
 	// Skip if nothing interesting found
 	if len(entities.FilesCreated) == 0 &&
 		len(entities.DependenciesAdded) == 0 &&
 		len(entities.PatternsUsed) == 0 &&
-		len(entities.ComponentsAdded) == 0 {
-		return Allow(), 0
+		len(entities.ComponentsAdded) == 0 &&
+		len(entities.Technologies) == 0 &&
+		len(entities.Concepts) == 0 {
+		return NoOp(), 0
 	}
 
 	// Save knowledge update
 	updatePath, err := saveKnowledgeUpdate(entities, cwd, sessionID)
 	if err != nil {
-		return Allow(), 0 // Fail silently
+		return NoOp(), 0 // Fail silently
 	}
 
 	// Build summary message
@@ -127,7 +130,7 @@ func KnowledgeUpdate(input HookInput, workDir string) (HookResult, int) {
 	msg.WriteString(strings.Repeat("=", 50))
 	msg.WriteString("\n")
 
-	return AllowMsg(msg.String()), 0
+	return NoOpMsg(msg.String()), 0
 }
 
 func extractEntitiesWithLLM(transcript string, apiKey string) (knowledgeEntities, error) {
@@ -265,19 +268,51 @@ Transcript:
 	return entities, nil
 }
 
-func saveKnowledgeUpdate(entities knowledgeEntities, cwd, sessionID string) (string, error) {
-	homeDir, err := os.UserHomeDir()
-	if err != nil {
-		return "", err
+// repoNameFromCwd returns a directory-safe name for the repo (git top-level base or cwd base).
+func repoNameFromCwd(cwd string) string {
+	dir := cwd
+	if dir == "" || dir == "." {
+		if wd, err := os.Getwd(); err == nil {
+			dir = wd
+		}
 	}
+	if dir == "" || dir == "." {
+		return "default"
+	}
+	cmd := exec.Command("git", "rev-parse", "--show-toplevel")
+	cmd.Dir = dir
+	if out, err := cmd.Output(); err == nil {
+		if root := strings.TrimSpace(string(out)); root != "" {
+			name := filepath.Base(root)
+			if name != "" && name != "." && name != ".." {
+				return name
+			}
+		}
+	}
+	name := filepath.Base(filepath.Clean(dir))
+	if name == "" || name == "." || name == ".." {
+		return "default"
+	}
+	return name
+}
 
-	knowledgeDir := filepath.Join(homeDir, "logs", "claude", "knowledge-updates")
-	if err := os.MkdirAll(knowledgeDir, 0755); err != nil {
+func saveKnowledgeUpdate(entities knowledgeEntities, cwd, sessionID string) (string, error) {
+	knowledgeDir := os.Getenv("HOOK_KNOWLEDGE_DIR")
+	if knowledgeDir == "" {
+		homeDir, err := os.UserHomeDir()
+		if err != nil {
+			return "", err
+		}
+		knowledgeDir = filepath.Join(homeDir, "logs", "claude", "knowledge-updates")
+	}
+	repoName := repoNameFromCwd(cwd)
+	repoDir := filepath.Join(knowledgeDir, repoName)
+	if err := os.MkdirAll(repoDir, 0755); err != nil {
 		return "", err
 	}
 
 	timestamp := time.Now()
-	updateFile := filepath.Join(knowledgeDir, fmt.Sprintf("knowledge_%s.json", timestamp.Format("20060102_150405")))
+	updateFile := filepath.Join(repoDir, fmt.Sprintf("knowledge_%s.json", timestamp.Format("20060102_150405")))
 
 	update := knowledgeUpdate{
 		Timestamp: timestamp.Format(time.RFC3339),
