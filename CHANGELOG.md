@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.2](https://github.com/89jobrien/hooks/compare/hooks-v0.3.1...hooks-v0.3.2) (2026-02-12)
+
+
+### Bug Fixes
+
+* resolve install.sh exit code issue and add Makefile help ([8437f54](https://github.com/89jobrien/hooks/commit/8437f542cdd376120b87c4e2aae59f7a1c3baaa6))
+* use absolute paths for hook binaries and harden CI ([3535b14](https://github.com/89jobrien/hooks/commit/3535b14d9f71f9fc2bc0f0068a54aa2999995fcc))
+
 ## [0.3.1](https://github.com/89jobrien/hooks/compare/hooks-v0.3.0...hooks-v0.3.1) (2026-02-12)
 
 
