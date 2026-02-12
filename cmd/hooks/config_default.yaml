@@ -1,0 +1,70 @@
+# Default hooks config. Written by: hooks init
+# Edit .hooks/config.yaml and run gen-config (or re-run hooks init after installing hook binaries).
+
+version: 1
+
+sessionStart:
+  - session-guard
+  - time-tracker-start
+  - codebase-map
+
+beforeSubmitPrompt:
+  - prompt-enricher
+  - codebase-map
+  - jit-context
+
+preToolUse:
+  - name: rate-limiter
+  - name: dry-run-mode
+    matcher: Shell
+  - name: validate-shell
+    matcher: Shell
+  - name: shellcheck
+    matcher: Shell
+  - name: no-long-running
+    matcher: Shell
+  - name: network-fence
+    matcher: Shell
+  - name: dependency-typosquat
+    matcher: Shell
+  - name: readonly-guard
+    matcher: Write
+  - name: path-validation
+    matcher: Write
+  - name: validate-write
+    matcher: Write
+  - name: file-size-guard
+    matcher: Write
+
+postToolUse:
+  - name: audit
+  - name: cost-estimator
+  - name: secret-scanner
+    matcher: Write
+  - name: lint-on-write
+    matcher: Write
+  - name: lint-changed
+    matcher: Write
+  - name: typecheck-changed
+    matcher: Write
+  - name: shellcheck
+    matcher: Write
+  - name: test-buddy
+    matcher: Write
+  - name: import-guard
+    matcher: Write
+  - name: check-any-changed
+    matcher: Write
+  - name: todo-tracker
+    matcher: Write
+
+stop:
+  - session-diary
+  - self-review
+  - knowledge-update
+
+preCompact:
+  - compact-snapshot
+
+sessionEnd:
+  - time-tracker-end

@@ -3,10 +3,12 @@ package main
 import (
 	"encoding/json"
 	"testing"
+
+	"hooks/internal/config"
 )
 
 func TestBuildAllowlistsJSON_EmitsDependencyTyposquatAndImportGuard(t *testing.T) {
-	a := &Allowlists{
+	a := &config.Allowlists{
 		NetworkFence: &struct {
 			AllowedDomains []string `yaml:"allowedDomains"`
 		}{AllowedDomains: []string{"localhost"}},
@@ -44,10 +46,10 @@ func TestHasAnyAllowlist(t *testing.T) {
 	if hasAnyAllowlist(nil) {
 		t.Error("nil should be false")
 	}
-	if hasAnyAllowlist(&Allowlists{}) {
+	if hasAnyAllowlist(&config.Allowlists{}) {
 		t.Error("empty allowlists should be false")
 	}
-	a := &Allowlists{
+	a := &config.Allowlists{
 		DependencyTyposquat: &struct {
 			AllowedPackages []string `yaml:"allowedPackages"`
 		}{AllowedPackages: []string{"x"}},

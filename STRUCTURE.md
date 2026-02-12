@@ -10,26 +10,26 @@
 
 ```
 hooks/
-├── go.mod
-├── config.yaml
-├── Makefile
-├── install.sh
-├── scripts/
-├── internal/
-│   └── hooks/
-│       ├── hookutil.go          # HookInput, HookResult, Run, RunOrDisabled, ReadInput, IsHookDisabled
-│       ├── hookutil_test.go
-│       ├── audit.go
-│       ├── audit_test.go
-│       ├── branch_guard.go
-│       ├── branch_guard_test.go
-│       └── ...                  # one .go + _test.go per hook
-└── cmd/
-    ├── audit/main.go
-    ├── branch-guard/main.go
-    ├── ...              # one dir per hook binary
-    ├── gen-config/main.go
-    └── gen-config/gen_config_test.go
+ go.mod
+ config.yaml
+ Makefile
+ install.sh
+ scripts/
+ internal/
+ hooks/
+ hookutil.go # HookInput, HookResult, Run, RunOrDisabled, ReadInput, IsHookDisabled
+ hookutil_test.go
+ audit.go
+ audit_test.go
+ branch_guard.go
+ branch_guard_test.go
+ ... # one .go + _test.go per hook
+ cmd/
+ audit/main.go
+ branch-guard/main.go
+ ... # one dir per hook binary
+ gen-config/main.go
+ gen-config/gen_config_test.go
 ```
 
 ## Contract

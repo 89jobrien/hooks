@@ -122,8 +122,13 @@ func runInteractive() {
 				continue
 			}
 			fmt.Println("saved", configPath)
-			genConfigPath := filepath.Join(workDir, "hooks", "bin", "gen-config")
-			if configPath != filepath.Join(workDir, "hooks", "config.yaml") {
+			var genConfigPath string
+			switch {
+			case configPath == filepath.Join(workDir, "hooks", "config.yaml"):
+				genConfigPath = filepath.Join(workDir, "hooks", "bin", "gen-config")
+			case configPath == filepath.Join(workDir, ".hooks", "config.yaml"):
+				genConfigPath = filepath.Join(workDir, ".hooks", "bin", "gen-config")
+			default:
 				genConfigPath = filepath.Join(workDir, "bin", "gen-config")
 			}
 			cmd := exec.Command(genConfigPath)

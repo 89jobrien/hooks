@@ -8,18 +8,30 @@ CMDS := \
 	time-tracker-start time-tracker-end \
 	rate-limiter cost-estimator dry-run-mode \
 	self-review knowledge-update \
-	gen-config interactive
+	gen-config hooks interactive
 
 BINS := $(addprefix $(BINDIR)/,$(CMDS))
 
-.PHONY: all test clean config summary docker-build docker-run
+# Install hooks binary to PREFIX/bin (default ~/.local so ~/.local/bin/hooks is on PATH).
+PREFIX ?= $(HOME)/.local
+
+.PHONY: all test clean config summary install docker-build docker-run
 
 all: $(BINS)
 
-# Generate .cursor/hooks.json and .claude/settings.json from hooks/config.yaml.
-# Run from repo root: make -C hooks config  (writes to repo root .cursor/ and .claude/).
+install: $(BINDIR)/hooks $(BINDIR)/gen-config
+	@mkdir -p $(PREFIX)/bin
+	install -m 755 $(BINDIR)/hooks $(PREFIX)/bin/hooks
+	install -m 755 $(BINDIR)/gen-config $(PREFIX)/bin/gen-config
+	@echo "installed $(PREFIX)/bin/hooks and $(PREFIX)/bin/gen-config — ensure $(PREFIX)/bin is on your PATH"
+
+# Generate .cursor/hooks.json and .claude/settings.json. Writes to cwd (repo root).
+# From this repo: make config. From a repo that has hooks as subdir: make -C hooks config.
+# From a repo with install.sh layout: run ./.hooks/bin/gen-config (no Makefile in .hooks).
 config: $(BINDIR)/gen-config
-	@cd .. && $(CURDIR)/$(BINDIR)/gen-config
+	@if [ ".hooks" = "$(notdir $(CURDIR))" ]; then cd .. && $(CURDIR)/$(BINDIR)/gen-config; \
+	elif [ "hooks" = "$(notdir $(CURDIR))" ]; then cd .. && $(CURDIR)/$(BINDIR)/gen-config; \
+	else $(CURDIR)/$(BINDIR)/gen-config; fi
 
 # Print audit/cost summary (run from anywhere; uses ~/.cursor/audit and ~/.cursor/cost by default).
 summary:

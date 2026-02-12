@@ -10,25 +10,25 @@ import (
 
 func main() {
 	if hooks.IsHookDisabled("knowledge-update") {
-		fmt.Println(`{"decision": "allow"}`)
+		fmt.Println("{}")
 		os.Exit(0)
 	}
 
 	data, err := io.ReadAll(os.Stdin)
 	if err != nil {
-		fmt.Println(`{"decision": "allow"}`)
+		fmt.Println("{}")
 		os.Exit(0)
 	}
 
 	var input hooks.HookInput
 	if err := json.Unmarshal(data, &input); err != nil {
-		fmt.Println(`{"decision": "allow"}`)
+		fmt.Println("{}")
 		os.Exit(0)
 	}
 
 	cwd, err := os.Getwd()
 	if err != nil {
-		fmt.Println(`{"decision": "allow"}`)
+		fmt.Println("{}")
 		os.Exit(0)
 	}
 
