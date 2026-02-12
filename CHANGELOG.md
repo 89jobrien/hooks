@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.3.0](https://github.com/89jobrien/hooks/compare/hooks-v0.2.0...hooks-v0.3.0) (2026-02-12)
+
+
+### Features
+
+* add configurable output paths and move hook data to ~/.config/hooks ([b9f4188](https://github.com/89jobrien/hooks/commit/b9f4188b4907240d574ee63c22c7970b66b8e11c))
+* add configurable output paths and move hook data to ~/.config/hooks ([#5](https://github.com/89jobrien/hooks/issues/5)) ([46cc2fe](https://github.com/89jobrien/hooks/commit/46cc2fe9656e7fc746ff0433d1e83751f14436de))
+* support OpenCode and document hook contract for multiple agents ([8b37faf](https://github.com/89jobrien/hooks/commit/8b37fafc2813eceb11336ebe41c8b61d14965b8e))
+* support OpenCode and document hook contract for multiple agents ([7e1cf32](https://github.com/89jobrien/hooks/commit/7e1cf32efd18bf3c03e93850e86c111a629b400d))
+
 ## [0.2.0](https://github.com/89jobrien/hooks/compare/hooks-v0.1.0...hooks-v0.2.0) (2026-02-11)
 
 
