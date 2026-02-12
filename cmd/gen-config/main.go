@@ -81,7 +81,7 @@ func main() {
 
 	// Resolve binPrefix: config.yaml output.binDir > default from config path
 	if cfg.Output != nil && cfg.Output.BinDir != "" {
-		bp := cfg.Output.BinDir
+		bp := config.ExpandHome(cfg.Output.BinDir)
 		if bp[len(bp)-1] != '/' {
 			bp += "/"
 		}
